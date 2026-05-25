@@ -20,7 +20,7 @@ class _LoginPageState extends State<LoginPage> {
     try{
       final auth = AuthManager.instance;
 
-      final user = await auth.signIn(emailController.text, passwordController.text);
+      await auth.signIn(emailController.text, passwordController.text);
     }
     on AuthException catch (e){
       SnackBar snackBar = SnackBar(content: Text(e.message));
@@ -83,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       child: Center(
                         child: MyTitle(
-                          text: "Sign Up!",
+                          text: "Login!",
                           color: Theme.of(context).colorScheme.primaryContainer,
                         ),
                       ),

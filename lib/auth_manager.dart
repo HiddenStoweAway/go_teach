@@ -8,14 +8,40 @@ class AuthManager {
   static AuthManager instance = AuthManager();
 
   Future<User?> signUp(String email, String password) async {
-    final AuthResponse res = await supabase.auth.signUp(password: password, email: email);
+    final AuthResponse res = await supabase.auth.signUp(
+      password: password,
+      email: email,
+    );
+
+    if (res.session != null){
+      await supabase.from("users").insert({
+        'user_id': res.user!.id,
+        'email': res.user!.email,
+      });
+    }
 
     return res.user;
   }
 
   Future<User?> signIn(String email, String password) async {
-    final AuthResponse res = await supabase.auth.signInWithPassword(password: password, email: email);
-    
+    final AuthResponse res = await supabase.auth.signInWithPassword(
+      password: password,
+      email: email,
+    );
+    final bool emailExists = await supabase
+        .from("users")
+        .select()
+        .eq("email", email)
+        .then((o) {
+          return o.isNotEmpty;
+        });
+
+    if (!emailExists && res.session != null) {
+      await supabase.from("users").insert({
+        'user_id': res.user!.id,
+        'email': res.user!.email,
+      });
+    }
     return res.user;
   }
 
@@ -23,11 +49,11 @@ class AuthManager {
     await supabase.auth.signOut();
   }
 
-  User? currentUser(){
+  User? currentUser() {
     return supabase.auth.currentUser;
   }
 
-  Widget authGate(){
+  Widget authGate() {
     return StreamBuilder<AuthState>(
       stream: supabase.auth.onAuthStateChange,
       builder: (context, snapshot) {
