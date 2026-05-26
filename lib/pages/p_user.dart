@@ -1,8 +1,9 @@
 import 'package:adobe_app/auth_manager.dart';
-import 'package:adobe_app/classes.dart';
+import 'package:adobe_app/class_manager.dart';
 import 'package:adobe_app/widgets/text_field.dart';
 import 'package:adobe_app/widgets/title.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 class UserPage extends StatefulWidget {
   const UserPage({super.key});
@@ -30,6 +31,21 @@ class _UserPageState extends State<UserPage> {
 
             TextButton(
               onPressed: () async {
+                final names = await ClassManager.instance.getClassNames();
+                if (names.contains(
+                  AuthManager.instance.currentUser()!.id + className.text,
+                )) {
+                  SnackBar snackBar = SnackBar(
+                    content: Text(
+                      "Already have a class called: ${className.text}",
+                    ),
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+                  Navigator.pop(context);
+                  return;
+                }
+
                 await ClassManager.instance.addClass(className.text);
 
                 Navigator.pop(context);
@@ -39,7 +55,7 @@ class _UserPageState extends State<UserPage> {
           ],
           content: SizedBox(
             width: 200,
-            child: MyTextField(controller: className, hintText: "Class name",),
+            child: MyTextField(controller: className, hintText: "Class name"),
           ),
         );
       },
@@ -47,6 +63,34 @@ class _UserPageState extends State<UserPage> {
   }
 
   void joinClass() {}
+
+  Future<ListView> getClassesList() async {
+    final classes = await ClassManager.instance.getClassNames();
+
+    List<ListTile> classTiles = [];
+
+    for (final i in classes) {
+      classTiles.add(
+        ListTile(
+          title: Container(
+            width: 250,
+            height: 250,
+
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(15),
+            ),
+
+            child: Text(
+              i.replaceAll(AuthManager.instance.currentUser()!.id, ""),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return ListView(children: classTiles, scrollDirection: Axis.horizontal);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,25 +115,70 @@ class _UserPageState extends State<UserPage> {
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 50.0),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      showCreateClassDialogue();
-                    },
-                    child: Container(
-                      width: 250,
-                      height: 250,
+              child: FutureBuilder<List<String>>(
+                future: ClassManager.instance.getClassNames(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  }
 
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(15),
-                      ),
+                  final classes = snapshot.data ?? [];
 
-                      child: Icon(Icons.add_circle_outline, size: 25),
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () async {
+                            await showCreateClassDialogue();
+                            setState(() {}); // refresh after adding
+                          },
+                          child: Container(
+                            width: 250,
+                            height: 250,
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: Icon(Icons.add_circle_outline, size: 25),
+                          ),
+                        ),
+                        ...classes.map(
+                          (className) => Padding(
+                            padding: EdgeInsets.only(left: 15),
+                            child: GestureDetector(
+                              onTap: () {
+                                print(className);
+                              },
+                              child: Container(
+                                width: 250,
+                                height: 250,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: Center(
+                                  child: MyTitle(
+                                    text: className.replaceAll(
+                                      AuthManager.instance.currentUser()!.id,
+                                      "",
+                                    ),
+
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
           ],
