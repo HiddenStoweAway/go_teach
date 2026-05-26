@@ -64,34 +64,6 @@ class _UserPageState extends State<UserPage> {
 
   void joinClass() {}
 
-  Future<ListView> getClassesList() async {
-    final classes = await ClassManager.instance.getClassNames();
-
-    List<ListTile> classTiles = [];
-
-    for (final i in classes) {
-      classTiles.add(
-        ListTile(
-          title: Container(
-            width: 250,
-            height: 250,
-
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(15),
-            ),
-
-            child: Text(
-              i.replaceAll(AuthManager.instance.currentUser()!.id, ""),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return ListView(children: classTiles, scrollDirection: Axis.horizontal);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
