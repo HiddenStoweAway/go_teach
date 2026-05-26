@@ -13,7 +13,10 @@ class MyTextField extends StatelessWidget {
       controller: controller,
       obscureText: hideText,
       decoration: InputDecoration(
-        hintText: hintText
+        hintText: hintText,
+        hintStyle: TextStyle(
+          fontStyle: FontStyle.italic
+        )
       ),
     );
   }
