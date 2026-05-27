@@ -1,4 +1,4 @@
-import 'package:adobe_app/pages/p_user.dart';
+import 'package:adobe_app/pages/p_user/p_user.dart';
 import 'package:adobe_app/pages/p_website_home.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
