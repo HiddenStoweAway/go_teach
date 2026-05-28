@@ -1,5 +1,6 @@
 import 'package:adobe_app/auth_manager.dart';
 import 'package:adobe_app/class_manager.dart';
+import 'package:adobe_app/pages/p_user/p_classroom.dart';
 import 'package:adobe_app/pages/p_user/p_teacher_dash.dart';
 import 'package:adobe_app/widgets/text_field.dart';
 import 'package:adobe_app/widgets/title.dart';
@@ -121,6 +122,8 @@ class _UserPageState extends State<UserPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             MyTitle(text: "My Classes: ", fontSize: 21),
+            SizedBox(height: 15,),
+
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 50.0),
@@ -202,7 +205,12 @@ class _UserPageState extends State<UserPage> {
               ),
             ),
 
+
+            SizedBox(height: 50,),
+
             MyTitle(text: "Join Classes: ", fontSize: 21),
+            SizedBox(height: 15,),
+
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 50.0),
@@ -214,7 +222,6 @@ class _UserPageState extends State<UserPage> {
                   }
 
                   final classes = snapshot.data ?? [];
-
                   return SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -237,33 +244,58 @@ class _UserPageState extends State<UserPage> {
                           ),
                         ),
                         ...classes.map(
-                          (className) => Padding(
-                            padding: EdgeInsets.only(left: 15),
-                            child: GestureDetector(
-                              onTap: () {
-                                print(className);
-                              },
-                              child: Container(
-                                width: 250,
-                                height: 250,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.primaryContainer,
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                child: Center(
-                                  child: MyTitle(
-                                    text: className.replaceAll(
-                                      AuthManager.instance.currentUser()!.id,
-                                      "",
-                                    ),
+                          (className) => FutureBuilder(
+                            future: ClassManager.instance.getClassInfo(
+                              className,
+                            ),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return CircularProgressIndicator();
+                              }
 
-                                    fontSize: 18,
+
+                              final data = snapshot.data;
+                              return Padding(
+                                padding: EdgeInsets.only(left: 15),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ClassroomPage(
+                                          classId: className,
+                                          className: className.replaceAll(
+                                            data?['owner_id'],
+                                            "",
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    width: 250,
+                                    height: 250,
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primaryContainer,
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    child: Center(
+                                      child: MyTitle(
+                                        text: className.replaceAll(
+                                          data?['owner_id'],
+                                          "",
+                                        ),
+
+                                        fontSize: 18,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
+                              );
+                            },
                           ),
                         ),
                       ],

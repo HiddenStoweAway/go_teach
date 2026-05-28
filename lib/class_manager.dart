@@ -65,6 +65,7 @@ class ClassManager {
         'class_id': currentUser.id + className,
         'students': [],
         'join_code': generateJoinCode(),
+        'owner_id': currentUser.id
       });
     } on PostgrestException catch (e) {
       print(e.message);
@@ -74,7 +75,27 @@ class ClassManager {
   }
 
   Future<List<String>> getJoinedClassNames() async {
-    return [];
+    final auth = AuthManager.instance;
+    final currentUser = auth.currentUser();
+
+    if (currentUser == null) {
+      return ["Couldn't Sign In"];
+    }
+
+    try {
+      final data = await supabase
+          .from("users")
+          .select()
+          .eq("user_id", currentUser.id);
+
+      return List<String>.from(data.single['joined_classes'] ?? []);
+    } on PostgrestException catch (e) {
+      print(e.message);
+    } catch (e) {
+      print("other error: $e"); // add this
+    }
+
+    return ["error fetching classes"];
   }
 
   // RETURNS AN ERROR DESCRIPTION IF ANY, OTHERWISE DOESN'T RETURN
@@ -87,15 +108,8 @@ class ClassManager {
     }
 
     try {
-      print("HERE");
-
       final codes = await supabase.from("classes").select("join_code");
       if (!codes.any((c) => c['join_code'] == code)) {
-        print(codes);
-        print({'join_code': code});
-
-        print(codes);
-        print(code);
         return "Code doesn't exist";
       }
 
