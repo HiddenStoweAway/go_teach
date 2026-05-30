@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 class WebHomePage extends StatefulWidget {
   const WebHomePage({super.key, required this.title});
 
- final String title;
+  final String title;
 
   @override
   State<WebHomePage> createState() => _WebHomePageState();
@@ -23,6 +23,40 @@ class _WebHomePageState extends State<WebHomePage> {
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 15.0),
         child: Column(
           children: [
+            SizedBox(height: 50),
+
+            MyTitle(
+              text: "Welcome to LEALO",
+              fontSize: 30,
+              color: Theme.of(context).primaryColor,
+            ),
+
+            SizedBox(height: 15),
+
+            Container(
+              width: 1000,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                  vertical: 25.0,
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      "LEALO is devoted to raising the equity in education in schools"
+                      " without enough teachers so that students get the support they need.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
             SizedBox(height: 50),
 
             MyTitle(text: "Sustainable Development Goal 4", fontSize: 18.0),
@@ -65,45 +99,160 @@ class _WebHomePageState extends State<WebHomePage> {
     );
   }
 
+  Widget featuresPage() {
+    return Center(
+      child: Column(
+        children: [
+          SizedBox(height: 50),
+
+          Container(
+            width: 1000,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8.0,
+                vertical: 25.0,
+              ),
+              child: Column(
+                children: [
+                  MyTitle(text: "Feature 1: AI Direct Teaching", fontSize: 18),
+
+                  SizedBox(height: 15),
+
+                  Text(
+                    "LEALO directly connects the AI to the student, and teaches the student to their own pace."
+                    " While the curriculum is preset, the AI can pace out and assign to the student based off of how the student is doing,"
+                    " and will review with the student as it sees fit.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 15),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          SizedBox(height: 75),
+
+          Container(
+            width: 1000,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8.0,
+                vertical: 25.0,
+              ),
+              child: Column(
+                children: [
+                  MyTitle(text: "Feature 1: AI Direct Teaching", fontSize: 18),
+
+                  SizedBox(height: 15),
+
+                  Text(
+                    "LEALO directly connects the AI to the student, and teaches the student to their own pace."
+                    " While the curriculum is preset, the AI can pace out and assign to the student based off of how the student is doing,"
+                    " and will review with the student as it sees fit.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 15),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          SizedBox(height: 75),
+
+          Container(
+            width: 1000,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8.0,
+                vertical: 25.0,
+              ),
+              child: Column(
+                children: [
+                  MyTitle(text: "Feature 1: AI Direct Teaching", fontSize: 18),
+
+                  SizedBox(height: 15),
+
+                  Text(
+                    "LEALO directly connects the AI to the student, and teaches the student to their own pace."
+                    " While the curriculum is preset, the AI can pace out and assign to the student based off of how the student is doing,"
+                    " and will review with the student as it sees fit.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 15),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final pages = {0: mainHomePage(), 4: HowItWorks(), 5: LoginPage()};
+    final pages = {
+      0: mainHomePage(),
+      1: featuresPage(),
+      4: HowItWorks(),
+      5: LoginPage(),
+    };
 
     // than having to individually change instances of widgets.
     return Scaffold(
-            appBar: AppBar(
-              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-              title: TextButton(
-                onPressed: () {
-                  setState(() {
-                    pageIndex = 0;
-                  });
-                },
-                child: MyTitle(text: widget.title, fontSize: 25),
-              ),
-              actions: [
-                // HOW IT WORKS BUTTON
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      pageIndex = 4;
-                    });
-                  },
-                  child: Text("How it Works"),
-                ),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: TextButton(
+          onPressed: () {
+            setState(() {
+              pageIndex = 0;
+            });
+          },
+          child: MyTitle(text: widget.title, fontSize: 25),
+        ),
+        actions: [
+          // HOW IT WORKS BUTTON
+          TextButton(
+            onPressed: () {
+              setState(() {
+                pageIndex = 4;
+              });
+            },
+            child: Text("How it Works"),
+          ),
 
-                // LOGIN PAGE BUTTOn
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      pageIndex = 5;
-                    });
-                  },
-                  child: Text("Login / Signup"),
-                ),
-              ],
-            ),
-            body: pages[pageIndex],
-          );
+          TextButton(
+            onPressed: () {
+              setState(() {
+                pageIndex = 1;
+              });
+            },
+            child: Text("Features"),
+          ),
+
+          // LOGIN PAGE BUTTOn
+          TextButton(
+            onPressed: () {
+              setState(() {
+                pageIndex = 5;
+              });
+            },
+            child: Text("Login / Signup"),
+          ),
+        ],
+      ),
+      body: pages[pageIndex],
+    );
   }
 }

@@ -68,7 +68,7 @@ class AuthManager {
         if (session != null) {
           return const UserPage(); // signed in
         } else {
-          return WebHomePage(title: 'Go Teach'); // signed out
+          return WebHomePage(title: 'LEALO'); // signed out
         }
       },
     );
