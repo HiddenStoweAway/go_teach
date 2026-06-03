@@ -36,6 +36,16 @@ class ClassManager {
     return ["error fetching classes"];
   }
 
+  Future<Map<String, dynamic>> getUserInfo(String userID) async {
+    try {
+      return await supabase.from('users').select().eq('user_id', userID).single();
+    } on PostgrestException catch (e) {
+      print(e.message);
+    }
+
+    return {"error": "error fetching info"};
+  }
+
   Future<void> addClass(String className) async {
     final auth = AuthManager.instance;
     final currentUser = auth.currentUser();
@@ -65,7 +75,7 @@ class ClassManager {
         'class_id': currentUser.id + className,
         'students': [],
         'join_code': generateJoinCode(),
-        'owner_id': currentUser.id
+        'owner_id': currentUser.id,
       });
     } on PostgrestException catch (e) {
       print(e.message);
@@ -174,7 +184,6 @@ class ClassManager {
           .single();
       return Map.from(data);
     } on PostgrestException catch (e) {
-      print("getClassInfo()");
       print(e.message);
     }
 

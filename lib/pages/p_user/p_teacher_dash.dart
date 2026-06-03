@@ -19,6 +19,7 @@ class TeacherDashboardPage extends StatefulWidget {
 class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
   @override
   Widget build(BuildContext context) {
+  
     return Scaffold(
       appBar: AppBar(
         title: MyTitle(text: widget.className),
@@ -43,19 +44,69 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                         ),
 
                         actions: [
-                          TextButton(onPressed: (){
-                            Navigator.pop(context);
-                          }, child: Text("Done"))
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text("Done"),
+                          ),
                         ],
                       );
                     },
                   );
                 },
-                child: MyTitle(text: snapshot.data!['join_code']),
+                child: MyTitle(text: snapshot.data!['join_code'], fontSize: 15),
               );
             },
           ),
         ],
+      ),
+      body: FutureBuilder(
+        future: ClassManager.instance.getClassInfo(widget.classId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return CircularProgressIndicator();
+          }
+
+          final studentIDS = snapshot.data?['students'];
+          return SingleChildScrollView(
+            child: Center(
+              child: Column(
+                children: [
+                  SizedBox(height: 45,),
+                  MyTitle(text: "Students:", fontSize: 18,),
+              
+                  ...studentIDS.map((studentID) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 20),
+                      child: Container(
+                        width: 1000,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(30.0),
+                          child: FutureBuilder(
+                            future: ClassManager.instance.getUserInfo(studentID),
+                            builder: (context, snapshot) {
+                              if(snapshot.connectionState == ConnectionState.waiting){
+                                return CircularProgressIndicator();
+                              }
+                              print(snapshot.data);
+                                      
+                              return MyTitle(text: snapshot.data?['email']);
+                            },
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
