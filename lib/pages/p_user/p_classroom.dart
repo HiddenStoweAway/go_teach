@@ -23,6 +23,9 @@ class _ClassroomPageState extends State<ClassroomPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: MyTitle(text: widget.className),
       ),
+      body: Column(
+        
+      ),
     );
   }
 }
