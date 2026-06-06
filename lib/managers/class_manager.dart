@@ -1,4 +1,4 @@
-import 'package:adobe_app/auth_manager.dart';
+import 'package:adobe_app/managers/auth_manager.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:math';
 
@@ -11,6 +11,16 @@ String generateJoinCode() {
 class ClassManager {
   final supabase = Supabase.instance.client;
   static ClassManager instance = ClassManager();
+
+  Future<void> updateLearningTarget(String classID, String target) async {
+    print("RUN");
+    try{
+      final data = await supabase.from("classes").update({"current_learning_goal": target}).eq("class_id", classID);
+    } on PostgrestException catch(e) {
+      print(e.message);
+    }
+    return;
+  }
 
   Future<List<String>> getMyClassNames() async {
     final auth = AuthManager.instance;

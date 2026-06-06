@@ -1,4 +1,4 @@
-import 'package:adobe_app/auth_manager.dart';
+import 'package:adobe_app/managers/auth_manager.dart';
 import 'package:adobe_app/pages/p_auth/p_signup.dart';
 import 'package:adobe_app/widgets/text_field.dart';
 import 'package:adobe_app/widgets/title.dart';
