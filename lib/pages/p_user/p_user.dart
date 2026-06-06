@@ -1,5 +1,5 @@
-import 'package:adobe_app/auth_manager.dart';
-import 'package:adobe_app/class_manager.dart';
+import 'package:adobe_app/managers/auth_manager.dart';
+import 'package:adobe_app/managers/class_manager.dart';
 import 'package:adobe_app/pages/p_user/p_classroom.dart';
 import 'package:adobe_app/pages/p_user/p_teacher_dash.dart';
 import 'package:adobe_app/widgets/text_field.dart';

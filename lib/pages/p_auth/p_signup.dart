@@ -1,4 +1,4 @@
-import 'package:adobe_app/auth_manager.dart';
+import 'package:adobe_app/managers/auth_manager.dart';
 import 'package:adobe_app/widgets/text_field.dart';
 import 'package:adobe_app/widgets/title.dart';
 import 'package:flutter/material.dart';

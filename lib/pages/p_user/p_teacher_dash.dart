@@ -1,4 +1,5 @@
-import 'package:adobe_app/class_manager.dart';
+import 'package:adobe_app/managers/class_manager.dart';
+import 'package:adobe_app/widgets/text_field.dart';
 import 'package:adobe_app/widgets/title.dart';
 import 'package:flutter/material.dart';
 
@@ -17,9 +18,10 @@ class TeacherDashboardPage extends StatefulWidget {
 }
 
 class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
+  final controller = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-  
     return Scaffold(
       appBar: AppBar(
         title: MyTitle(text: widget.className),
@@ -73,9 +75,38 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
             child: Center(
               child: Column(
                 children: [
-                  SizedBox(height: 45,),
-                  MyTitle(text: "Students:", fontSize: 18,),
-              
+                  SizedBox(height: 45),
+                  MyTitle(text: "Current Learning Idea:", fontSize: 18),
+                  SizedBox(height: 20),
+
+                  // LEARNING GOAL TEXTBOX
+                  SizedBox(
+                    width: 500,
+                    child: MyTextField(controller: controller)
+                  ),
+
+                  SizedBox(height: 20),
+
+                  GestureDetector(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                      ),
+
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                        child: Text("Save"),
+                      ),
+                    ),
+                    onTap: () async {
+                      await ClassManager.instance.updateLearningTarget(widget.classId, controller.text);
+                    },
+                  ),
+
+                  SizedBox(height: 45),
+                  MyTitle(text: "Students:", fontSize: 18),
+
                   ...studentIDS.map((studentID) {
                     return Padding(
                       padding: const EdgeInsets.only(top: 20),
@@ -88,13 +119,15 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                         child: Padding(
                           padding: const EdgeInsets.all(30.0),
                           child: FutureBuilder(
-                            future: ClassManager.instance.getUserInfo(studentID),
+                            future: ClassManager.instance.getUserInfo(
+                              studentID,
+                            ),
                             builder: (context, snapshot) {
-                              if(snapshot.connectionState == ConnectionState.waiting){
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
                                 return CircularProgressIndicator();
                               }
-                              print(snapshot.data);
-                                      
+
                               return MyTitle(text: snapshot.data?['email']);
                             },
                           ),
