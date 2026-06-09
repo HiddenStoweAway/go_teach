@@ -149,14 +149,13 @@ class _WebHomePageState extends State<WebHomePage> {
               ),
               child: Column(
                 children: [
-                  MyTitle(text: "Feature 1: AI Direct Teaching", fontSize: 18),
+                  MyTitle(text: "Feature 2: Teacher Dashboard", fontSize: 18),
 
                   SizedBox(height: 15),
 
                   Text(
-                    "LEALO directly connects the AI to the student, and teaches the student to their own pace."
-                    " While the curriculum is preset, the AI can pace out and assign to the student based off of how the student is doing,"
-                    " and will review with the student as it sees fit.",
+                    "LEALO has a teacher dashboard where every teacher can assign a topic to learn."
+                    " They are also able to track how each student is doing in their learning process.",
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 15),
                   ),
