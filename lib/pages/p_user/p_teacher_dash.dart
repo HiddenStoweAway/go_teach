@@ -82,7 +82,21 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                   // LEARNING GOAL TEXTBOX
                   SizedBox(
                     width: 500,
-                    child: MyTextField(controller: controller)
+                    child: FutureBuilder(
+                      future: ClassManager.instance.getLearningTarget(
+                        widget.classId,
+                      ),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        }
+
+                        controller.text = snapshot.data!;
+
+                        return MyTextField(controller: controller);
+                      },
+                    ),
                   ),
 
                   SizedBox(height: 20),
@@ -95,12 +109,22 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                       ),
 
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 15,
+                          vertical: 8,
+                        ),
                         child: Text("Save"),
                       ),
                     ),
                     onTap: () async {
-                      await ClassManager.instance.updateLearningTarget(widget.classId, controller.text);
+                      await ClassManager.instance.updateLearningTarget(
+                        widget.classId,
+                        controller.text,
+                      );
+
+                      SnackBar snackBar = SnackBar(content: Text("Saved"));
+
+                      ScaffoldMessenger.of(context).showSnackBar(snackBar);
                     },
                   ),
 

@@ -1,7 +1,5 @@
 import 'package:adobe_app/managers/auth_manager.dart';
-import 'package:adobe_app/managers/gemini_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'api_keys.dart';
 
@@ -11,7 +9,6 @@ Future<void> main() async {
   final keys = ApiKeys.instance;
 
   await Supabase.initialize(url: keys.supabaseUrl, anonKey: keys.anonKey);
-  Gemini.init(apiKey: keys.gemini);
 
   runApp(const MyApp());
 }
