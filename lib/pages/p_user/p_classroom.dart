@@ -28,6 +28,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
 
   void sendMessage(String msg) async {
     setState(() {
+      messages.add({'role': 'user', 'text': msg});
       messages.add({'text': 'Loading...'});
     });
 
@@ -37,7 +38,6 @@ class _ClassroomPageState extends State<ClassroomPage> {
 
     setState(() {
       messages.removeLast();
-      messages.add({'role': 'user', 'text': msg});
       print(_chatManager);
       messages.add({'role': 'model', 'text': response!});
     });
@@ -62,6 +62,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
         .eq('class_id', widget.classId)
         .eq('user_id', userId)
         .order('created_at', ascending: true);
+      print(rows);
 
     setState(() {
       messages = rows
