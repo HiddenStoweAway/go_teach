@@ -13,13 +13,24 @@ class ClassManager {
   static ClassManager instance = ClassManager();
 
   Future<void> updateLearningTarget(String classID, String target) async {
-    print("RUN");
     try{
       final data = await supabase.from("classes").update({"current_learning_goal": target}).eq("class_id", classID);
     } on PostgrestException catch(e) {
       print(e.message);
     }
     return;
+  }
+
+  Future<String> getLearningTarget(String classID) async {
+    try{
+      final target = await supabase.from("classes").select().eq("class_id", classID).single();
+      return target['current_learning_goal'];
+    } on PostgrestException catch(e){
+      print(e.message);
+      return e.message;
+    }
+
+    return "error";
   }
 
   Future<List<String>> getMyClassNames() async {
