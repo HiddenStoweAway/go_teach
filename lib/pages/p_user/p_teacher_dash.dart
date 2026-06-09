@@ -124,6 +124,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
 
                       SnackBar snackBar = SnackBar(content: Text("Saved"));
 
+                      // ignore: use_build_context_synchronously
                       ScaffoldMessenger.of(context).showSnackBar(snackBar);
                     },
                   ),

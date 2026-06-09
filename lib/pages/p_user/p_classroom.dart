@@ -53,7 +53,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
     final target = await ClassManager.instance.getLearningTarget(
       widget.classId,
     );
-    _chatManager = ChatManager(target!);
+    _chatManager = ChatManager(target);
     await _chatManager!.load(widget.classId);
     final userId = Supabase.instance.client.auth.currentUser!.id;
     final rows = await Supabase.instance.client
