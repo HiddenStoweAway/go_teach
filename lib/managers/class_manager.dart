@@ -14,7 +14,7 @@ class ClassManager {
 
   Future<void> updateLearningTarget(String classID, String target) async {
     try{
-      final data = await supabase.from("classes").update({"current_learning_goal": target}).eq("class_id", classID);
+      await supabase.from("classes").update({"current_learning_goal": target}).eq("class_id", classID);
     } on PostgrestException catch(e) {
       print(e.message);
     }
@@ -29,8 +29,6 @@ class ClassManager {
       print(e.message);
       return e.message;
     }
-
-    return "error";
   }
 
   Future<List<String>> getMyClassNames() async {

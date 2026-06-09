@@ -25,6 +25,7 @@ class _LoginPageState extends State<LoginPage> {
     on AuthException catch (e){
       SnackBar snackBar = SnackBar(content: Text(e.message));
 
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }

@@ -41,14 +41,17 @@ class _UserPageState extends State<UserPage> {
                       "Already have a class called: ${className.text}",
                     ),
                   );
+                  // ignore: use_build_context_synchronously
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
+                  // ignore: use_build_context_synchronously
                   Navigator.pop(context);
                   return;
                 }
 
                 await ClassManager.instance.addClass(className.text);
 
+                // ignore: use_build_context_synchronously
                 Navigator.pop(context);
               },
               child: Text("Add Class"),
@@ -86,8 +89,10 @@ class _UserPageState extends State<UserPage> {
                 if (error != null) {
                   SnackBar snackBar = SnackBar(content: Text(error));
 
+                  // ignore: use_build_context_synchronously
                   ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 }
+                // ignore: use_build_context_synchronously
                 Navigator.pop(context);
               },
               child: Text("Join Class"),
