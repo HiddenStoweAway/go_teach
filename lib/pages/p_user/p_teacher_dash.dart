@@ -2,6 +2,7 @@ import 'package:adobe_app/managers/class_manager.dart';
 import 'package:adobe_app/widgets/text_field.dart';
 import 'package:adobe_app/widgets/title.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class TeacherDashboardPage extends StatefulWidget {
   const TeacherDashboardPage({
@@ -46,6 +47,24 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                         ),
 
                         actions: [
+                          TextButton(
+                            onPressed: () async {
+                              await Clipboard.setData(
+                                ClipboardData(
+                                  text: snapshot.data!['join_code'],
+                                ),
+                              );
+
+                              final snackBar = SnackBar(
+                                content: Text("Copied to Clipboard"),
+                              );
+                              ScaffoldMessenger.of(
+                                context,
+                              ).showSnackBar(snackBar);
+                            },
+                            child: Text("Copy to Clipboard"),
+                          ),
+
                           TextButton(
                             onPressed: () {
                               Navigator.pop(context);
@@ -130,7 +149,13 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                   ),
 
                   SizedBox(height: 45),
-                  MyTitle(text: "Students:", fontSize: 18),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      MyTitle(text: "Students:", fontSize: 18),
+                      IconButton(onPressed: () {}, icon: Icon(Icons.info_outline)),
+                    ],
+                  ),
 
                   ...studentIDS.map((studentID) {
                     return Padding(
@@ -153,7 +178,40 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                                 return CircularProgressIndicator();
                               }
 
-                              return MyTitle(text: snapshot.data?['email']);
+                              return Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  MyTitle(text: snapshot.data?['email']),
+
+                                  FutureBuilder(
+                                    future: ClassManager.instance
+                                        .getUserReports(studentID),
+                                    builder: (context, snapshot) {
+                                      if(snapshot.connectionState == ConnectionState.waiting){
+                                        return CircularProgressIndicator();
+                                      }
+
+                                      final data = snapshot.data!;
+
+                                      if(data.isEmpty){
+                                        return Icon(Icons.question_mark);
+                                      }
+
+                                      if(data[0]['understanding'] == 'low'){
+                                        return Icon(Icons.assignment_late_rounded, color:Colors.red);
+                                      }
+                                      else if(data[0]['understanding'] == 'medium'){
+                                        return Icon(Icons.access_time, color:Colors.orange);
+                                      }
+                                      else if(data[0]['understanding'] == 'high'){
+                                        return Icon(Icons.check, color:Colors.green);
+                                      }
+                                      return Placeholder();
+                                    },
+                                  ),
+                                ],
+                              );
                             },
                           ),
                         ),

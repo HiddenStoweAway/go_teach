@@ -38,7 +38,7 @@ class ChatManager {
         'Leave report fields as "none" if there is not enough data yet.';
 
     _model = GenerativeModel(
-      model: 'gemini-2.5-flash', // cheapest, fast
+      model: 'gemini-3.5-flash', // cheapest, fast
       apiKey: ApiKeys.instance.gemini,
       systemInstruction: Content.system(systemInstruction),
     );
@@ -52,7 +52,6 @@ class ChatManager {
       print(e);
     } // this holds history automatically
 
-    print('ABC');
     if (history.isEmpty) {
       final response = await _chat.sendMessage(Content.text("Hello"));
 
@@ -139,6 +138,8 @@ class ChatManager {
       final parsed = _parseResponse(raw);
       final content = parsed['content'] as String;
       final report = parsed['report'] as Map<String, String>?;
+
+      print(parsed);
 
       if (report != null) {
         await _saveReport(classID, report);

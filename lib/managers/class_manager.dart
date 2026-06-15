@@ -31,6 +31,13 @@ class ClassManager {
     }
   }
 
+  Future<List<Map<String, dynamic>>> getUserReports(String userID) async {
+    final report = await supabase.from('reports').select().eq('student_id', userID).order('created_at');
+    print(report);
+
+    return report;
+  }
+
   Future<List<String>> getMyClassNames() async {
     final auth = AuthManager.instance;
     final currentUser = auth.currentUser();
