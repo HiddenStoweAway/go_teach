@@ -6,8 +6,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class ChatManager {
   late final GenerativeModel _model;
   late final ChatSession _chat;
+  late final String target;
 
   ChatManager(String learningGoal) {
+    target = learningGoal;
     final systemInstruction =
         'You are an expert, patient tutor teaching me about $learningGoal. '
         'Your primary goal is to identify my strengths and weaknesses and adapt your teaching style accordingly. '
@@ -28,21 +30,22 @@ class ChatManager {
         '- Only teach topics related to $learningGoal. Politely redirect me if I go off topic. '
         '- Never use LaTeX or dollar sign math notation. Write math expressions in plain text, for example write x squared instead of x^2. '
         '- Keep responses concise and conversational. Do not overwhelm me with too much information at once. '
-        '- Always end your response with either a question or a prompt to keep me engaged.';
+        '- Always end your response with either a question or a prompt to keep me engaged.'
+        'Only leave report fields as null if there is not yet enough data to assess.'
+        'RESPONSE FORMAT: You must always respond in exactly this format and nothing else: '
+        '<CONTENT>your message to the student here</CONTENT>'
+        '<REPORT>understanding=high/medium/low|strengths=...|weaknesses=...|progress=...</REPORT>'
+        'Leave report fields as "none" if there is not enough data yet.';
 
     _model = GenerativeModel(
       model: 'gemini-2.5-flash', // cheapest, fast
       apiKey: ApiKeys.instance.gemini,
-      systemInstruction: Content.system(
-        systemInstruction
-      ),
+      systemInstruction: Content.system(systemInstruction),
     );
   }
 
   Future<void> load(String classID) async {
     final history = await getHistory(classID);
-    print("AB");
-
     try {
       _chat = _model.startChat(history: history);
     } catch (e) {
@@ -52,7 +55,13 @@ class ChatManager {
     print('ABC');
     if (history.isEmpty) {
       final response = await _chat.sendMessage(Content.text("Hello"));
-      await _saveMessage("model", response.text ?? "No Response", classID);
+
+      // strip markdown code fences if Gemini wraps in ```json
+      final raw = response.text ?? '';
+      final parsed = _parseResponse(raw);
+      final content = parsed['content'] as String;
+
+      await _saveMessage("model", content, classID);
       print("Send");
     }
   }
@@ -60,11 +69,13 @@ class ChatManager {
   Future<List<Content>> getHistory(String classId) async {
     try {
       final userId = Supabase.instance.client.auth.currentUser!.id;
+      print(target);
       final rows = await Supabase.instance.client
           .from('messages')
           .select()
           .eq('class_id', classId)
           .eq('user_id', userId)
+          .eq('current_learning_goal', target)
           .order('created_at');
 
       if (rows.isEmpty) return [];
@@ -81,17 +92,62 @@ class ChatManager {
     return [];
   }
 
+  Map<String, dynamic> _parseResponse(String raw) {
+    try {
+      final contentMatch = RegExp(
+        r'<CONTENT>(.*?)<\/CONTENT>',
+        dotAll: true,
+      ).firstMatch(raw);
+      final reportMatch = RegExp(
+        r'<REPORT>(.*?)<\/REPORT>',
+        dotAll: true,
+      ).firstMatch(raw);
+
+      final content = contentMatch?.group(1)?.trim() ?? raw;
+
+      Map<String, String>? report;
+      if (reportMatch != null) {
+        final reportStr = reportMatch.group(1)!;
+        final fields = Map.fromEntries(
+          reportStr.split('|').map((part) {
+            final split = part.split('=');
+            return MapEntry(split[0].trim(), split.sublist(1).join('=').trim());
+          }),
+        );
+        report = {
+          'understanding': fields['understanding'] ?? 'none',
+          'strengths': fields['strengths'] ?? 'none',
+          'weaknesses': fields['weaknesses'] ?? 'none',
+          'progress': fields['progress'] ?? 'none',
+        };
+      }
+
+      return {'content': content, 'report': report};
+    } catch (e) {
+      print('Parse error: $e');
+      return {'content': raw, 'report': null};
+    }
+  }
+
   Future<String> sendMessage(String classID, String message) async {
     try {
       await _saveMessage('user', message, classID);
 
       final response = await _chat.sendMessage(Content.text(message));
+      // strip markdown code fences if Gemini wraps in ```json
+      final raw = response.text ?? '';
+      final parsed = _parseResponse(raw);
+      final content = parsed['content'] as String;
+      final report = parsed['report'] as Map<String, String>?;
 
-      final reply = response.text ?? 'No response';
-      await _saveMessage('model', reply, classID);
-      return reply;
+      if (report != null) {
+        await _saveReport(classID, report);
+        print(report);
+      }
+
+      await _saveMessage('model', content, classID);
+      return content;
     } catch (e, stackTrace) {
-      print("XXX");
       print('ERROR: $e');
       print('STACK: $stackTrace');
       return 'error';
@@ -105,6 +161,25 @@ class ChatManager {
       'user_id': userId,
       'role': role,
       'content': content,
+      'current_learning_goal': target,
     });
+  }
+
+  Future<void> _saveReport(String classId, Map<String, String> report) async {
+    final userId = Supabase.instance.client.auth.currentUser!.id;
+    await Supabase.instance.client.from('reports').upsert(
+      {
+        'class_id': classId,
+        'student_id': userId,
+        'current_learning_goal': target,
+        'understanding': report['understanding'],
+        'strengths': report['strengths'],
+        'weaknesses': report['weaknesses'],
+        'progress': report['progress'],
+        'updated_at': DateTime.now().toIso8601String(),
+      },
+      onConflict:
+          'class_id, student_id, current_learning_goal', // update existing row instead of inserting
+    );
   }
 }

@@ -40,6 +40,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
       messages.removeLast();
       print(_chatManager);
       messages.add({'role': 'model', 'text': response!});
+      controller.text = "";
     });
   }
 
@@ -61,8 +62,9 @@ class _ClassroomPageState extends State<ClassroomPage> {
         .select()
         .eq('class_id', widget.classId)
         .eq('user_id', userId)
+        .eq('current_learning_goal', target)
         .order('created_at', ascending: true);
-      print(rows);
+    print(rows);
 
     setState(() {
       messages = rows
@@ -84,7 +86,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : Column(
-            mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Expanded(
                   child: ListView(
@@ -103,7 +105,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: isUser
-                                  ? Colors.blue[600]
+                                  ? Theme.of(context).colorScheme.primaryContainer
                                   : Colors.grey[200],
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -111,7 +113,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
                               data: message['text']!,
                               styleSheet: MarkdownStyleSheet(
                                 p: TextStyle(
-                                  color: isUser ? Colors.white : Colors.black87,
+                                  color: isUser ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.primary,
                                 ),
                                 strong: TextStyle(
                                   color: isUser ? Colors.white : Colors.black87,
@@ -122,16 +124,30 @@ class _ClassroomPageState extends State<ClassroomPage> {
                           ),
                         );
                       }),
-
                     ],
-                    
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: Row(
                     children: [
-                      Expanded(child: SearchBar(controller: controller)),
+                      Expanded(
+                        child: TextField(
+                          controller: controller,
+                          keyboardType: TextInputType.multiline,
+                          maxLines: null, // allows unlimited lines
+                          decoration: InputDecoration(
+                            hintText: 'Enter response...',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(28),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                          ),
+                        ),
+                      ),
                       const SizedBox(width: 8),
                       IconButton.filled(
                         onPressed: () => sendMessage(controller.text),
