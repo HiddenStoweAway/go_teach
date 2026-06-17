@@ -1,5 +1,4 @@
 import 'package:adobe_app/pages/p_auth/p_login.dart';
-import 'package:adobe_app/pages/p_how_it_works.dart';
 import 'package:adobe_app/widgets/title.dart';
 import 'package:flutter/material.dart';
 
@@ -155,7 +154,7 @@ class _WebHomePageState extends State<WebHomePage> {
 
                   Text(
                     "LEALO has a teacher dashboard where every teacher can assign a topic to learn."
-                    " They are also able to track how each student is doing in their learning process.",
+                    " They are also able to track how each student is doing in their learning process with the strengths and weaknesses of each student.",
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 15),
                   ),
@@ -179,14 +178,19 @@ class _WebHomePageState extends State<WebHomePage> {
               ),
               child: Column(
                 children: [
-                  MyTitle(text: "Feature 1: AI Direct Teaching", fontSize: 18),
+                  MyTitle(
+                    text: "Feature 3: Natural Language Processing (NLP)",
+                    fontSize: 18,
+                  ),
 
                   SizedBox(height: 15),
 
                   Text(
-                    "LEALO directly connects the AI to the student, and teaches the student to their own pace."
-                    " While the curriculum is preset, the AI can pace out and assign to the student based off of how the student is doing,"
-                    " and will review with the student as it sees fit.",
+                    "LEALO's Artificial Intelligence uses NLP in order to process the text the user inputs."
+                    " It turns text into rough contextual meanings stored as directional vectors.  "
+                    " This way, the AI can process it because these vectors are just number."
+                    " It then spits back out new vectors that are turned back into text for the user."
+                    "",
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 15),
                   ),
@@ -201,12 +205,7 @@ class _WebHomePageState extends State<WebHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final pages = {
-      0: mainHomePage(),
-      1: featuresPage(),
-      4: HowItWorks(),
-      5: LoginPage(),
-    };
+    final pages = {0: mainHomePage(), 1: featuresPage(), 5: LoginPage()};
 
     // than having to individually change instances of widgets.
     return Scaffold(
@@ -218,19 +217,22 @@ class _WebHomePageState extends State<WebHomePage> {
               pageIndex = 0;
             });
           },
-          child: MyTitle(text: widget.title, fontSize: 25),
+          child: SizedBox(
+            width: 150,
+            child: Row(
+              children: [
+                Image(
+                  image: AssetImage('assets/logo.png'),
+                  height: 50,
+                  fit: BoxFit.contain,
+                ),
+                SizedBox(width:10),
+                MyTitle(text: widget.title, fontSize: 25),
+              ],
+            ),
+          ),
         ),
         actions: [
-          // HOW IT WORKS BUTTON
-          TextButton(
-            onPressed: () {
-              setState(() {
-                pageIndex = 4;
-              });
-            },
-            child: Text("How it Works"),
-          ),
-
           TextButton(
             onPressed: () {
               setState(() {
