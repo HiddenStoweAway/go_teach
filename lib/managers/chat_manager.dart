@@ -11,7 +11,7 @@ class ChatManager {
   ChatManager(String learningGoal) {
     target = learningGoal;
     final systemInstruction =
-        'You are an expert, patient tutor teaching me about $learningGoal. '
+        'You are an expert, patient tutor teaching me about the following learning goal: $learningGoal. '
         'Your primary goal is to identify my strengths and weaknesses and adapt your teaching style accordingly. '
         'Follow this teaching approach: '
         '1. Start by asking me a few diagnostic questions to assess my current knowledge level. '
@@ -35,10 +35,11 @@ class ChatManager {
         'RESPONSE FORMAT: You must always respond in exactly this format and nothing else: '
         '<CONTENT>your message to the student here</CONTENT>'
         '<REPORT>understanding=high/medium/low|strengths=...|weaknesses=...|progress=...</REPORT>'
+        'Make sure understanding is truly reflective of the understanding of specificallty the learning goal'
         'Leave report fields as "none" if there is not enough data yet.';
 
     _model = GenerativeModel(
-      model: 'gemini-3.5-flash', // cheapest, fast
+      model: 'gemini-2.5-flash', // cheapest, fast
       apiKey: ApiKeys.instance.gemini,
       systemInstruction: Content.system(systemInstruction),
     );

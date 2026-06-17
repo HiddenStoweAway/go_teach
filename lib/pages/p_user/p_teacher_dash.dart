@@ -1,4 +1,5 @@
 import 'package:adobe_app/managers/class_manager.dart';
+import 'package:adobe_app/pages/p_user/p_student_info.dart';
 import 'package:adobe_app/widgets/text_field.dart';
 import 'package:adobe_app/widgets/title.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +46,6 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                         title: MyTitle(
                           text: "Join Code: ${snapshot.data!['join_code']}",
                         ),
-
                         actions: [
                           TextButton(
                             onPressed: () async {
@@ -64,7 +64,6 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                             },
                             child: Text("Copy to Clipboard"),
                           ),
-
                           TextButton(
                             onPressed: () {
                               Navigator.pop(context);
@@ -126,7 +125,6 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                         borderRadius: BorderRadius.circular(15),
                         color: Theme.of(context).colorScheme.primaryContainer,
                       ),
-
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 15,
@@ -153,66 +151,100 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       MyTitle(text: "Students:", fontSize: 18),
-                      IconButton(onPressed: () {}, icon: Icon(Icons.info_outline)),
+                      IconButton(
+                          onPressed: () {}, icon: Icon(Icons.info_outline)),
                     ],
                   ),
 
                   ...studentIDS.map((studentID) {
                     return Padding(
                       padding: const EdgeInsets.only(top: 20),
-                      child: Container(
-                        width: 1000,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Theme.of(context).colorScheme.primaryContainer,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(30.0),
-                          child: FutureBuilder(
-                            future: ClassManager.instance.getUserInfo(
-                              studentID,
-                            ),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return CircularProgressIndicator();
-                              }
+                      child: GestureDetector(
+                        onTap: () async {
+                          final reports = await ClassManager.instance
+                              .getUserReports(studentID);
 
-                              return Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  MyTitle(text: snapshot.data?['email']),
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(builder: (context) {
+                            return StudentInfoPage(
+                                classID: widget.classId,
+                                studentID: studentID,
+                                reports: reports);
+                          }));
+                        },
+                        child: Container(
+                          width: 1000,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color:
+                                Theme.of(context).colorScheme.primaryContainer,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(30.0),
+                            child: FutureBuilder(
+                              future: ClassManager.instance.getUserInfo(
+                                studentID,
+                              ),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return CircularProgressIndicator();
+                                }
 
-                                  FutureBuilder(
-                                    future: ClassManager.instance
-                                        .getUserReports(studentID),
-                                    builder: (context, snapshot) {
-                                      if(snapshot.connectionState == ConnectionState.waiting){
-                                        return CircularProgressIndicator();
-                                      }
+                                return Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    MyTitle(text: snapshot.data?['email']),
+                                    FutureBuilder(
+                                      future: Future.wait([
+                                        ClassManager.instance
+                                            .getUserReports(studentID),
+                                        ClassManager.instance
+                                            .getLearningTarget(widget.classId)
+                                      ]),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.waiting) {
+                                          return CircularProgressIndicator();
+                                        }
 
-                                      final data = snapshot.data!;
+                                        final reports = snapshot.data![0]
+                                            as List<Map<String, dynamic>>;
+                                        final target =
+                                            snapshot.data![1] as String;
 
-                                      if(data.isEmpty){
+                                        if(reports.isEmpty){
+                                          return Icon(Icons.question_mark);
+                                        }
+
+                                        if (reports[0]
+                                                ['current_learning_goal'] ==
+                                            target) {
+                                          if (reports[0]['understanding'] ==
+                                              'low') {
+                                            return Icon(
+                                                Icons.assignment_late_rounded,
+                                                color: Colors.red);
+                                          } else if (reports[0]
+                                                  ['understanding'] ==
+                                              'medium') {
+                                            return Icon(Icons.access_time,
+                                                color: Colors.orange);
+                                          } else if (reports[0]
+                                                  ['understanding'] ==
+                                              'high') {
+                                            return Icon(Icons.check,
+                                                color: Colors.green);
+                                          }
+                                        }
                                         return Icon(Icons.question_mark);
-                                      }
-
-                                      if(data[0]['understanding'] == 'low'){
-                                        return Icon(Icons.assignment_late_rounded, color:Colors.red);
-                                      }
-                                      else if(data[0]['understanding'] == 'medium'){
-                                        return Icon(Icons.access_time, color:Colors.orange);
-                                      }
-                                      else if(data[0]['understanding'] == 'high'){
-                                        return Icon(Icons.check, color:Colors.green);
-                                      }
-                                      return Placeholder();
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
+                                      },
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ),
