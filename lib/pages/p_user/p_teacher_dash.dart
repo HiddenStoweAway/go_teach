@@ -134,6 +134,14 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                       ),
                     ),
                     onTap: () async {
+                      if (controller.text.isEmpty) {
+                        SnackBar snackBar = SnackBar(content: Text("Cannot leave goal empty"));
+                        // ignore: use_build_context_synchronously
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+                        return;
+                      }
+
                       await ClassManager.instance.updateLearningTarget(
                         widget.classId,
                         controller.text,
@@ -152,7 +160,9 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     children: [
                       MyTitle(text: "Students:", fontSize: 18),
                       IconButton(
-                          onPressed: () {}, icon: Icon(Icons.info_outline)),
+                        onPressed: () {},
+                        icon: Icon(Icons.info_outline),
+                      ),
                     ],
                   ),
 
@@ -164,20 +174,25 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                           final reports = await ClassManager.instance
                               .getUserReports(studentID);
 
-                          Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (context) {
-                            return StudentInfoPage(
-                                classID: widget.classId,
-                                studentID: studentID,
-                                reports: reports);
-                          }));
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return StudentInfoPage(
+                                  classID: widget.classId,
+                                  studentID: studentID,
+                                  reports: reports,
+                                );
+                              },
+                            ),
+                          );
                         },
                         child: Container(
                           width: 1000,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(15),
-                            color:
-                                Theme.of(context).colorScheme.primaryContainer,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer,
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(30.0),
@@ -198,10 +213,12 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                                     MyTitle(text: snapshot.data?['email']),
                                     FutureBuilder(
                                       future: Future.wait([
-                                        ClassManager.instance
-                                            .getUserReports(studentID),
-                                        ClassManager.instance
-                                            .getLearningTarget(widget.classId)
+                                        ClassManager.instance.getUserReports(
+                                          studentID,
+                                        ),
+                                        ClassManager.instance.getLearningTarget(
+                                          widget.classId,
+                                        ),
                                       ]),
                                       builder: (context, snapshot) {
                                         if (snapshot.connectionState ==
@@ -209,33 +226,36 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                                           return CircularProgressIndicator();
                                         }
 
-                                        final reports = snapshot.data![0]
-                                            as List<Map<String, dynamic>>;
+                                        final reports =
+                                            snapshot.data![0]
+                                                as List<Map<String, dynamic>>;
                                         final target =
                                             snapshot.data![1] as String;
 
-                                        if(reports.isEmpty){
+                                        if (reports.isEmpty) {
                                           return Icon(Icons.question_mark);
                                         }
 
-                                        if (reports[0]
-                                                ['current_learning_goal'] ==
+                                        if (reports[0]['current_learning_goal'] ==
                                             target) {
                                           if (reports[0]['understanding'] ==
                                               'low') {
                                             return Icon(
-                                                Icons.assignment_late_rounded,
-                                                color: Colors.red);
-                                          } else if (reports[0]
-                                                  ['understanding'] ==
+                                              Icons.assignment_late_rounded,
+                                              color: Colors.red,
+                                            );
+                                          } else if (reports[0]['understanding'] ==
                                               'medium') {
-                                            return Icon(Icons.access_time,
-                                                color: Colors.orange);
-                                          } else if (reports[0]
-                                                  ['understanding'] ==
+                                            return Icon(
+                                              Icons.access_time,
+                                              color: Colors.orange,
+                                            );
+                                          } else if (reports[0]['understanding'] ==
                                               'high') {
-                                            return Icon(Icons.check,
-                                                color: Colors.green);
+                                            return Icon(
+                                              Icons.check,
+                                              color: Colors.green,
+                                            );
                                           }
                                         }
                                         return Icon(Icons.question_mark);

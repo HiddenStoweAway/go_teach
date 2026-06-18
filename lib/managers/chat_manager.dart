@@ -5,7 +5,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChatManager {
   late final GenerativeModel _model;
+  late final GenerativeModel _fallbackModel;
+  bool usingFallback = false;
   late final ChatSession _chat;
+  late final ChatSession _fallbackChat;
   late final String target;
 
   ChatManager(String learningGoal) {
@@ -26,6 +29,7 @@ class ChatManager {
         '- If I answer incorrectly or seem confused, slow down and break the concept into smaller pieces. '
         '- Only move on to a new subtopic when I have demonstrated clear understanding of the current one. '
         'When you are confident I have mastered $learningGoal, present me with a final set of homework questions that cover all the key concepts. Grade my answers and give detailed feedback. '
+        'After this, if you are satisfied I have learned the content, you may politely end the conversation.'
         'Important rules: '
         '- Only teach topics related to $learningGoal. Politely redirect me if I go off topic. '
         '- Never use LaTeX or dollar sign math notation. Write math expressions in plain text, for example write x squared instead of x^2. '
@@ -39,7 +43,13 @@ class ChatManager {
         'Leave report fields as "none" if there is not enough data yet.';
 
     _model = GenerativeModel(
-      model: 'gemini-2.5-flash', // cheapest, fast
+      model: 'gemini-3.5-flash', // cheapest, fast
+      apiKey: ApiKeys.instance.gemini,
+      systemInstruction: Content.system(systemInstruction),
+    );
+
+    _fallbackModel = GenerativeModel(
+      model: 'gemini-2.5-flash',
       apiKey: ApiKeys.instance.gemini,
       systemInstruction: Content.system(systemInstruction),
     );
@@ -129,13 +139,61 @@ class ChatManager {
     }
   }
 
+  Future<void> loadFallback(String classID) async {
+    final history = await getHistory(classID);
+    try {
+      _fallbackChat = _fallbackModel.startChat(history: history);
+    } catch (e) {
+      print(e);
+    } // this holds history automatically
+  }
+
   Future<String> sendMessage(String classID, String message) async {
     try {
-      await _saveMessage('user', message, classID);
+      GenerateContentResponse? response;
 
-      final response = await _chat.sendMessage(Content.text(message));
+      if (!usingFallback) {
+        for (int i = 0; i <= 3; i++) {
+          try {
+            response = await _chat.sendMessage(Content.text(message));
+            break;
+          } on GenerativeAIException catch (e) {
+            print(e.message);
+            if (e.message.contains('503') && i < 3) {
+              await Future.delayed(Duration(seconds: i * 2)); // 2s, 4s, 6s
+              continue;
+            } else if (i == 3) {
+              loadFallback(classID);
+
+              print("SWITCH");
+              usingFallback = true;
+              // Now with the fallback model
+              response = await _fallbackChat.sendMessage(Content.text(message));
+            }
+          }
+        }
+      }
+      else{
+        print("USING FALLBACK DEFAULT");
+
+        for (int i = 0; i <= 3; i++) {
+          try {
+            response = await _fallbackChat.sendMessage(Content.text(message));
+            break;
+          } on GenerativeAIException catch (e) {
+            print(e.message);
+            if (e.message.contains('503') && i < 3) {
+              await Future.delayed(Duration(seconds: i * 2)); // 2s, 4s, 6s
+              continue;
+            } else if (i == 3) {
+              return 'both models failed to deliver response: ${e.message}';
+            }
+          }
+        }
+      }
+      await _saveMessage('user', message, classID);
       // strip markdown code fences if Gemini wraps in ```json
-      final raw = response.text ?? '';
+      final raw = response?.text ?? '';
       final parsed = _parseResponse(raw);
       final content = parsed['content'] as String;
       final report = parsed['report'] as Map<String, String>?;
