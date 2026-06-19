@@ -40,7 +40,8 @@ class ChatManager {
         '<CONTENT>your message to the student here</CONTENT>'
         '<REPORT>understanding=high/medium/low|strengths=...|weaknesses=...|progress=...</REPORT>'
         'Make sure understanding is truly reflective of the understanding of specificallty the learning goal'
-        'Leave report fields as "none" if there is not enough data yet.';
+        'Leave report fields as "none" if there is not enough data yet.'
+        'However, make sure to have a report when applicable and is necessary';
 
     _model = GenerativeModel(
       model: 'gemini-3.5-flash', // cheapest, fast
@@ -64,15 +65,35 @@ class ChatManager {
     } // this holds history automatically
 
     if (history.isEmpty) {
-      final response = await _chat.sendMessage(Content.text("Hello"));
+      GenerateContentResponse? response;
+      for (int i = 0; i < 3; i++) {
+        try {
+          response = await _chat.sendMessage(Content.text("Hello"));
+          break;
+        } on GenerativeAIException catch (e) {
+          print(e.message);
+          if (e.message.contains('503') && i < 2) {
+            await Future.delayed(Duration(seconds: i * 2)); // 2s, 4s, 6s
+            continue;
+          } else if (i == 2) {
+            await loadFallback(classID);
+
+            print("SWITCH");
+            usingFallback = true;
+            // Now with the fallback model
+            response = await _fallbackChat.sendMessage(Content.text("Hello"));
+          }
+        }
+      }
+
+      print(response?.text);
 
       // strip markdown code fences if Gemini wraps in ```json
-      final raw = response.text ?? '';
+      final raw = response?.text ?? '';
       final parsed = _parseResponse(raw);
       final content = parsed['content'] as String;
 
       await _saveMessage("model", content, classID);
-      print("Send");
     }
   }
 
@@ -153,17 +174,17 @@ class ChatManager {
       GenerateContentResponse? response;
 
       if (!usingFallback) {
-        for (int i = 0; i <= 3; i++) {
+        for (int i = 0; i < 3; i++) {
           try {
             response = await _chat.sendMessage(Content.text(message));
             break;
           } on GenerativeAIException catch (e) {
             print(e.message);
-            if (e.message.contains('503') && i < 3) {
+            if (e.message.contains('503') && i < 2) {
               await Future.delayed(Duration(seconds: i * 2)); // 2s, 4s, 6s
               continue;
-            } else if (i == 3) {
-              loadFallback(classID);
+            } else if (i == 2) {
+              await loadFallback(classID);
 
               print("SWITCH");
               usingFallback = true;
@@ -172,8 +193,7 @@ class ChatManager {
             }
           }
         }
-      }
-      else{
+      } else {
         print("USING FALLBACK DEFAULT");
 
         for (int i = 0; i <= 3; i++) {
