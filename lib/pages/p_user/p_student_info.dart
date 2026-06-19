@@ -74,7 +74,7 @@ class _StudentInfoPageState extends State<StudentInfoPage> {
                                 spacing: 10,
                                 children: [
                                   MyTitle(text: "Strengths:"),
-                                  Text(report['strengths']),
+                                  Expanded(child: Text(report['strengths'], softWrap: true,)),
                                 ],
                               ),
                               Row(
@@ -82,7 +82,7 @@ class _StudentInfoPageState extends State<StudentInfoPage> {
                                 spacing: 10,
                                 children: [
                                   MyTitle(text: "Weaknesses:"),
-                                  Text(report['weaknesses']),
+                                  Expanded(child: Text(report['weaknesses'], softWrap: true)),
                                 ],
                               ),
                               Row(
@@ -90,7 +90,7 @@ class _StudentInfoPageState extends State<StudentInfoPage> {
                                 spacing: 10,
                                 children: [
                                   MyTitle(text: "Progress:"),
-                                  Text(report['progress']),
+                                  Expanded(child: Text(report['progress'], softWrap: true,)),
                                 ],
                               ),
                             ],
