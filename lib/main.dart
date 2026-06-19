@@ -20,8 +20,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'LEALO',
-    
+      title: 'Flutter Demo',
+
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color.fromARGB(255, 126, 167, 255),
