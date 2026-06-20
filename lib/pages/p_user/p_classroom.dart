@@ -34,9 +34,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
       messages.add({'text': 'Loading...'});
     });
 
-    print("Hey");
     final response = await _chatManager?.sendMessage(widget.classId, msg);
-    print("Y");
 
     setState(() {
       messages.removeLast();

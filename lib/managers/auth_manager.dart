@@ -13,12 +13,13 @@ class AuthManager {
       email: email,
     );
 
-    if (res.session != null){
-      await supabase.from("users").insert({
-        'user_id': res.user!.id,
-        'email': res.user!.email,
-      });
-    }
+    // ADDED INTO SUPABASE SO THIS IS HANDLED AUTOMATICALLY NOW
+    // if (res.session != null){
+    //   await supabase.from("users").insert({
+    //     'user_id': res.user!.id,
+    //     'email': res.user!.email,
+    //   });
+    // }
 
     return res.user;
   }
