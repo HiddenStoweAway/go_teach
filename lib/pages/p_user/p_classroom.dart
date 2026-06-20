@@ -27,6 +27,8 @@ class _ClassroomPageState extends State<ClassroomPage> {
   final scrollController = ScrollController();
 
   void sendMessage(String msg) async {
+    controller.text = "";
+
     setState(() {
       messages.add({'role': 'user', 'text': msg});
       messages.add({'text': 'Loading...'});
@@ -40,7 +42,6 @@ class _ClassroomPageState extends State<ClassroomPage> {
       messages.removeLast();
       print(_chatManager);
       messages.add({'role': 'model', 'text': response!});
-      controller.text = "";
     });
   }
 
@@ -151,7 +152,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
                       const SizedBox(width: 8),
                       IconButton.filled(
                         onPressed: () => sendMessage(controller.text),
-                        icon: const Icon(Icons.send),
+                        icon: const Icon(Icons.send)
                       ),
                     ],
                   ),

@@ -1,19 +1,18 @@
-import 'package:adobe_app/api_keys.dart';
 import 'package:adobe_app/managers/auth_manager.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChatManager {
-  late final GenerativeModel _model;
-  late final GenerativeModel _fallbackModel;
   bool usingFallback = false;
-  late final ChatSession _chat;
-  late final ChatSession _fallbackChat;
   late final String target;
+
+  static const _primaryModel = 'gemini-3.5-flash';
+  static const _fallbackModel = 'gemini-2.5-flash';
+
+  late final String systemInstruction;
 
   ChatManager(String learningGoal) {
     target = learningGoal;
-    final systemInstruction =
+    systemInstruction =
         'You are an expert, patient tutor teaching me about the following learning goal: $learningGoal. '
         'Your primary goal is to identify my strengths and weaknesses and adapt your teaching style accordingly. '
         'Follow this teaching approach: '
@@ -40,64 +39,49 @@ class ChatManager {
         '<CONTENT>your message to the student here</CONTENT>'
         '<REPORT>understanding=high/medium/low|strengths=...|weaknesses=...|progress=...</REPORT>'
         'Make sure understanding is truly reflective of the understanding of specificallty the learning goal'
-        'Leave report fields as "none" if there is not enough data yet.'
+        'Leave report fields as "none" if there is not yet enough data yet.'
         'However, make sure to have a report when applicable and is necessary';
-
-    _model = GenerativeModel(
-      model: 'gemini-3.5-flash', // cheapest, fast
-      apiKey: ApiKeys.instance.gemini,
-      systemInstruction: Content.system(systemInstruction),
-    );
-
-    _fallbackModel = GenerativeModel(
-      model: 'gemini-2.5-flash',
-      apiKey: ApiKeys.instance.gemini,
-      systemInstruction: Content.system(systemInstruction),
-    );
   }
 
+  // Just checks if this is the first message in the class - no state kept around.
   Future<void> load(String classID) async {
     final history = await getHistory(classID);
-    try {
-      _chat = _model.startChat(history: history);
-    } catch (e) {
-      print(e);
-    } // this holds history automatically
 
     if (history.isEmpty) {
-      GenerateContentResponse? response;
+      String? raw;
       for (int i = 0; i < 3; i++) {
         try {
-          response = await _chat.sendMessage(Content.text("Hello"));
+          raw = await _sendToEdgeFunction(
+            "Hello",
+            [],
+            usingFallback ? _fallbackModel : _primaryModel,
+          );
           break;
-        } on GenerativeAIException catch (e) {
-          print(e.message);
-          if (e.message.contains('503') && i < 2) {
-            await Future.delayed(Duration(seconds: i * 2)); // 2s, 4s, 6s
+        } catch (e) {
+          print(e);
+          if (e.toString().contains('503') && i < 2) {
+            await Future.delayed(Duration(seconds: i * 2));
             continue;
           } else if (i == 2) {
-            await loadFallback(classID);
-
             print("SWITCH");
             usingFallback = true;
-            // Now with the fallback model
-            response = await _fallbackChat.sendMessage(Content.text("Hello"));
+            raw = await _sendToEdgeFunction("Hello", [], _fallbackModel);
           }
         }
       }
 
-      print(response?.text);
+      print(raw);
 
-      // strip markdown code fences if Gemini wraps in ```json
-      final raw = response?.text ?? '';
-      final parsed = _parseResponse(raw);
+      final parsed = _parseResponse(raw ?? '');
       final content = parsed['content'] as String;
 
       await _saveMessage("model", content, classID);
     }
   }
 
-  Future<List<Content>> getHistory(String classId) async {
+  // Always pulls the full, ordered history straight from Supabase.
+  // This is the single source of truth - no separate in-memory copy to get out of sync.
+  Future<List<Map<String, dynamic>>> getHistory(String classId) async {
     try {
       final userId = Supabase.instance.client.auth.currentUser!.id;
       print(target);
@@ -111,11 +95,16 @@ class ChatManager {
 
       if (rows.isEmpty) return [];
 
-      final history = rows
-          .map((row) => Content(row['role'], [TextPart(row['content'])]))
+      return rows
+          .map<Map<String, dynamic>>(
+            (row) => {
+              'role': row['role'],
+              'parts': [
+                {'text': row['content']},
+              ],
+            },
+          )
           .toList();
-
-      return history;
     } on PostgrestException catch (e) {
       print(e.message);
     }
@@ -142,7 +131,10 @@ class ChatManager {
         final fields = Map.fromEntries(
           reportStr.split('|').map((part) {
             final split = part.split('=');
-            return MapEntry(split[0].trim(), split.sublist(1).join('=').trim());
+            return MapEntry(
+              split[0].trim(),
+              split.sublist(1).join('=').trim(),
+            );
           }),
         );
         report = {
@@ -160,36 +152,57 @@ class ChatManager {
     }
   }
 
-  Future<void> loadFallback(String classID) async {
-    final history = await getHistory(classID);
-    try {
-      _fallbackChat = _fallbackModel.startChat(history: history);
-    } catch (e) {
-      print(e);
-    } // this holds history automatically
+  // Calls the Supabase Edge Function. `history` is passed in fresh each time
+  // by the caller (sendMessage/load) rather than tracked as instance state.
+  Future<String> _sendToEdgeFunction(
+    String message,
+    List<Map<String, dynamic>> history,
+    String model,
+  ) async {
+    final response = await Supabase.instance.client.functions.invoke(
+      'chat',
+      body: {
+        'systemInstruction': systemInstruction,
+        'history': history,
+        'message': message,
+        'model': model,
+      },
+    );
+
+    final data = response.data;
+    if (data is Map && data['error'] != null) {
+      throw Exception(data['error'].toString());
+    }
+
+    return data['text'] as String? ?? '';
   }
 
   Future<String> sendMessage(String classID, String message) async {
     try {
-      GenerateContentResponse? response;
+      // Pull current history fresh from Supabase right before sending.
+      // This is the only place history comes from - no separate state to drift.
+      final history = await getHistory(classID);
+
+      String? raw;
 
       if (!usingFallback) {
         for (int i = 0; i < 3; i++) {
           try {
-            response = await _chat.sendMessage(Content.text(message));
+            raw = await _sendToEdgeFunction(message, history, _primaryModel);
             break;
-          } on GenerativeAIException catch (e) {
-            print(e.message);
-            if (e.message.contains('503') && i < 2) {
-              await Future.delayed(Duration(seconds: i * 2)); // 2s, 4s, 6s
+          } catch (e) {
+            print(e);
+            if (e.toString().contains('503') && i < 2) {
+              await Future.delayed(Duration(seconds: i * 2));
               continue;
             } else if (i == 2) {
-              await loadFallback(classID);
-
               print("SWITCH");
               usingFallback = true;
-              // Now with the fallback model
-              response = await _fallbackChat.sendMessage(Content.text(message));
+              raw = await _sendToEdgeFunction(
+                message,
+                history,
+                _fallbackModel,
+              );
             }
           }
         }
@@ -198,23 +211,25 @@ class ChatManager {
 
         for (int i = 0; i <= 3; i++) {
           try {
-            response = await _fallbackChat.sendMessage(Content.text(message));
+            raw = await _sendToEdgeFunction(message, history, _fallbackModel);
             break;
-          } on GenerativeAIException catch (e) {
-            print(e.message);
-            if (e.message.contains('503') && i < 3) {
-              await Future.delayed(Duration(seconds: i * 2)); // 2s, 4s, 6s
+          } catch (e) {
+            print(e);
+            if (e.toString().contains('503') && i < 3) {
+              await Future.delayed(Duration(seconds: i * 2));
               continue;
             } else if (i == 3) {
-              return 'both models failed to deliver response: ${e.message}';
+              return 'both models failed to deliver response: $e';
             }
           }
         }
       }
+
+      // Save the user message AFTER fetching history above, so it's not
+      // accidentally double-counted in the history sent to Gemini.
       await _saveMessage('user', message, classID);
-      // strip markdown code fences if Gemini wraps in ```json
-      final raw = response?.text ?? '';
-      final parsed = _parseResponse(raw);
+
+      final parsed = _parseResponse(raw ?? '');
       final content = parsed['content'] as String;
       final report = parsed['report'] as Map<String, String>?;
 
@@ -234,7 +249,11 @@ class ChatManager {
     }
   }
 
-  Future<void> _saveMessage(String role, String content, String classId) async {
+  Future<void> _saveMessage(
+    String role,
+    String content,
+    String classId,
+  ) async {
     final userId = AuthManager.instance.currentUser()!.id;
     await Supabase.instance.client.from('messages').insert({
       'class_id': classId,
@@ -258,8 +277,7 @@ class ChatManager {
         'progress': report['progress'],
         'updated_at': DateTime.now().toIso8601String(),
       },
-      onConflict:
-          'class_id, student_id, current_learning_goal', // update existing row instead of inserting
+      onConflict: 'class_id, student_id, current_learning_goal',
     );
   }
 }

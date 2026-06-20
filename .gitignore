@@ -45,4 +45,4 @@ app.*.map.json
 /android/app/release
 
 # My ignores
-api_keys.dart
+# api_keys.dart
