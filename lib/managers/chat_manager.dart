@@ -1,18 +1,19 @@
+import 'package:adobe_app/api_keys.dart';
 import 'package:adobe_app/managers/auth_manager.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChatManager {
-  late final String target;
-  late final String _systemInstruction;
-  final List<Map<String, dynamic>> _history = [];
+  late final GenerativeModel _model;
+  late final GenerativeModel _fallbackModel;
   bool usingFallback = false;
-
-  static const _primaryModel = 'gemini-2.5-flash';
-  static const _fallbackModel = 'gemini-2.5-flash-lite';
+  late final ChatSession _chat;
+  late final ChatSession _fallbackChat;
+  late final String target;
 
   ChatManager(String learningGoal) {
     target = learningGoal;
-    _systemInstruction =
+    final systemInstruction =
         'You are an expert, patient tutor teaching me about the following learning goal: $learningGoal. '
         'Your primary goal is to identify my strengths and weaknesses and adapt your teaching style accordingly. '
         'Follow this teaching approach: '
@@ -28,43 +29,75 @@ class ChatManager {
         '- If I answer incorrectly or seem confused, slow down and break the concept into smaller pieces. '
         '- Only move on to a new subtopic when I have demonstrated clear understanding of the current one. '
         'When you are confident I have mastered $learningGoal, present me with a final set of homework questions that cover all the key concepts. Grade my answers and give detailed feedback. '
-        'After this, if you are satisfied I have learned the content, you may politely end the conversation. '
+        'After this, if you are satisfied I have learned the content, you may politely end the conversation.'
         'Important rules: '
         '- Only teach topics related to $learningGoal. Politely redirect me if I go off topic. '
         '- Never use LaTeX or dollar sign math notation. Write math expressions in plain text, for example write x squared instead of x^2. '
         '- Keep responses concise and conversational. Do not overwhelm me with too much information at once. '
-        '- Always end your response with either a question or a prompt to keep me engaged. '
+        '- Always end your response with either a question or a prompt to keep me engaged.'
+        'Only leave report fields as null if there is not yet enough data to assess.'
         'RESPONSE FORMAT: You must always respond in exactly this format and nothing else: '
         '<CONTENT>your message to the student here</CONTENT>'
         '<REPORT>understanding=high/medium/low|strengths=...|weaknesses=...|progress=...</REPORT>'
-        'Make sure understanding is truly reflective of the understanding of specifically the learning goal. '
-        'Leave report fields as "none" if there is not yet enough data to assess, but include a report when applicable and necessary.';
-  }
+        'Make sure understanding is truly reflective of the understanding of specificallty the learning goal'
+        'Leave report fields as "none" if there is not enough data yet.'
+        'However, make sure to have a report when applicable and is necessary';
 
-  // ---------- LOAD / HISTORY ----------
+    _model = GenerativeModel(
+      model: 'gemini-3.5-flash', // cheapest, fast
+      apiKey: ApiKeys.instance.gemini,
+      systemInstruction: Content.system(systemInstruction),
+    );
+
+    _fallbackModel = GenerativeModel(
+      model: 'gemini-2.5-flash',
+      apiKey: ApiKeys.instance.gemini,
+      systemInstruction: Content.system(systemInstruction),
+    );
+  }
 
   Future<void> load(String classID) async {
     final history = await getHistory(classID);
-    _history.clear();
-    _history.addAll(history);
+    try {
+      _chat = _model.startChat(history: history);
+    } catch (e) {
+      print(e);
+    } // this holds history automatically
 
-    if (_history.isEmpty) {
-      final raw = await _callEdgeFunction("Hello");
+    if (history.isEmpty) {
+      GenerateContentResponse? response;
+      for (int i = 0; i < 3; i++) {
+        try {
+          response = await _chat.sendMessage(Content.text("Hello"));
+          break;
+        } on GenerativeAIException catch (e) {
+          print(e.message);
+          if (e.message.contains('503') && i < 2) {
+            await Future.delayed(Duration(seconds: i * 2)); // 2s, 4s, 6s
+            continue;
+          } else if (i == 2) {
+            await loadFallback(classID);
+
+            print("SWITCH");
+            usingFallback = true;
+            // Now with the fallback model
+            response = await _fallbackChat.sendMessage(Content.text("Hello"));
+          }
+        }
+      }
+
+      print(response?.text);
+
+      // strip markdown code fences if Gemini wraps in ```json
+      final raw = response?.text ?? '';
       final parsed = _parseResponse(raw);
       final content = parsed['content'] as String;
-
-      _history.add({
-        'role': 'model',
-        'parts': [
-          {'text': raw},
-        ],
-      });
 
       await _saveMessage("model", content, classID);
     }
   }
 
-  Future<List<Map<String, dynamic>>> getHistory(String classId) async {
+  Future<List<Content>> getHistory(String classId) async {
     try {
       final userId = Supabase.instance.client.auth.currentUser!.id;
       print(target);
@@ -78,24 +111,17 @@ class ChatManager {
 
       if (rows.isEmpty) return [];
 
-      return rows
-          .map<Map<String, dynamic>>(
-            (row) => {
-              'role': row['role'],
-              'parts': [
-                {'text': row['content']},
-              ],
-            },
-          )
+      final history = rows
+          .map((row) => Content(row['role'], [TextPart(row['content'])]))
           .toList();
+
+      return history;
     } on PostgrestException catch (e) {
       print(e.message);
     }
 
     return [];
   }
-
-  // ---------- PARSING ----------
 
   Map<String, dynamic> _parseResponse(String raw) {
     try {
@@ -116,10 +142,7 @@ class ChatManager {
         final fields = Map.fromEntries(
           reportStr.split('|').map((part) {
             final split = part.split('=');
-            return MapEntry(
-              split[0].trim(),
-              split.sublist(1).join('=').trim(),
-            );
+            return MapEntry(split[0].trim(), split.sublist(1).join('=').trim());
           }),
         );
         report = {
@@ -137,81 +160,65 @@ class ChatManager {
     }
   }
 
-  // ---------- EDGE FUNCTION CALL (replaces direct Gemini SDK calls) ----------
-
-  Future<String> _callEdgeFunction(String message) async {
-    final model = usingFallback ? _fallbackModel : _primaryModel;
-
-    for (int i = 0; i < 3; i++) {
-      try {
-        final response = await Supabase.instance.client.functions.invoke(
-          'chat',
-          body: {
-            'systemInstruction': _systemInstruction,
-            'history': _history,
-            'message': message,
-            'model': model,
-          },
-        );
-
-        final data = response.data;
-
-        if (data is Map && data['error'] != null) {
-          final errStr = data['error'].toString();
-          print('Edge function error: $errStr');
-
-          if (errStr.contains('503') && i < 2) {
-            await Future.delayed(Duration(seconds: (i + 1) * 2)); // 2s, 4s
-            continue;
-          }
-
-          if (!usingFallback) {
-            print("SWITCH to fallback model");
-            usingFallback = true;
-            return _callEdgeFunction(message); // retry once with fallback model
-          }
-
-          return 'both models failed to deliver a response: $errStr';
-        }
-
-        return data['text'] as String? ?? '';
-      } catch (e) {
-        print('Edge function call failed: $e');
-        if (i == 2) {
-          return 'error: could not reach the server';
-        }
-        await Future.delayed(Duration(seconds: (i + 1) * 2));
-      }
-    }
-
-    return 'error';
+  Future<void> loadFallback(String classID) async {
+    final history = await getHistory(classID);
+    try {
+      _fallbackChat = _fallbackModel.startChat(history: history);
+    } catch (e) {
+      print(e);
+    } // this holds history automatically
   }
-
-  // ---------- SEND MESSAGE ----------
 
   Future<String> sendMessage(String classID, String message) async {
     try {
-      await _saveMessage('user', message, classID);
-      _history.add({
-        'role': 'user',
-        'parts': [
-          {'text': message},
-        ],
-      });
+      GenerateContentResponse? response;
 
-      final raw = await _callEdgeFunction(message);
+      if (!usingFallback) {
+        for (int i = 0; i < 3; i++) {
+          try {
+            response = await _chat.sendMessage(Content.text(message));
+            break;
+          } on GenerativeAIException catch (e) {
+            print(e.message);
+            if (e.message.contains('503') && i < 2) {
+              await Future.delayed(Duration(seconds: i * 2)); // 2s, 4s, 6s
+              continue;
+            } else if (i == 2) {
+              await loadFallback(classID);
+
+              print("SWITCH");
+              usingFallback = true;
+              // Now with the fallback model
+              response = await _fallbackChat.sendMessage(Content.text(message));
+            }
+          }
+        }
+      } else {
+        print("USING FALLBACK DEFAULT");
+
+        for (int i = 0; i <= 3; i++) {
+          try {
+            response = await _fallbackChat.sendMessage(Content.text(message));
+            break;
+          } on GenerativeAIException catch (e) {
+            print(e.message);
+            if (e.message.contains('503') && i < 3) {
+              await Future.delayed(Duration(seconds: i * 2)); // 2s, 4s, 6s
+              continue;
+            } else if (i == 3) {
+              return 'both models failed to deliver response: ${e.message}';
+            }
+          }
+        }
+      }
+      await _saveMessage('user', message, classID);
+      // strip markdown code fences if Gemini wraps in ```json
+      final raw = response?.text ?? '';
       final parsed = _parseResponse(raw);
       final content = parsed['content'] as String;
       final report = parsed['report'] as Map<String, String>?;
 
       print(parsed);
-
-      _history.add({
-        'role': 'model',
-        'parts': [
-          {'text': raw},
-        ],
-      });
 
       if (report != null) {
         await _saveReport(classID, report);
@@ -227,13 +234,7 @@ class ChatManager {
     }
   }
 
-  // ---------- SUPABASE SAVES ----------
-
-  Future<void> _saveMessage(
-    String role,
-    String content,
-    String classId,
-  ) async {
+  Future<void> _saveMessage(String role, String content, String classId) async {
     final userId = AuthManager.instance.currentUser()!.id;
     await Supabase.instance.client.from('messages').insert({
       'class_id': classId,
@@ -257,7 +258,8 @@ class ChatManager {
         'progress': report['progress'],
         'updated_at': DateTime.now().toIso8601String(),
       },
-      onConflict: 'class_id, student_id, current_learning_goal',
+      onConflict:
+          'class_id, student_id, current_learning_goal', // update existing row instead of inserting
     );
   }
 }
