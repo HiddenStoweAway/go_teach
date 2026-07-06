@@ -8,7 +8,10 @@ Future<void> main() async {
 
   final keys = ApiKeys.instance;
 
-  await Supabase.initialize(url: keys.supabaseUrl, publishableKey: keys.anonKey);
+  await Supabase.initialize(
+    url: keys.supabaseUrl,
+    publishableKey: keys.anonKey,
+  );
 
   runApp(const MyApp());
 }

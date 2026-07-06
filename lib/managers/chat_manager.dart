@@ -34,6 +34,7 @@ class ChatManager {
         '- Never use LaTeX or dollar sign math notation. Write math expressions in plain text, for example write x squared instead of x^2. '
         '- Keep responses concise and conversational. Do not overwhelm me with too much information at once. '
         '- Always end your response with either a question or a prompt to keep me engaged.'
+        '- Keep everything school appropriate.'
         'Only leave report fields as null if there is not yet enough data to assess.'
         'RESPONSE FORMAT: You must always respond in exactly this format and nothing else: '
         '<CONTENT>your message to the student here</CONTENT>'
