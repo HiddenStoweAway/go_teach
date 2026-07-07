@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 class MyTitle extends StatelessWidget {
-  const MyTitle({super.key, required this.text, this.fontSize, this.color});
+  const MyTitle({super.key, required this.text, this.fontSize, this.color, this.softWrap});
   final String? text;
   final double? fontSize;
   final Color? color;
+  final bool? softWrap;
 
   @override
   Widget build(BuildContext context) {
@@ -12,6 +13,7 @@ class MyTitle extends StatelessWidget {
       fontWeight: FontWeight.bold,
       fontSize: fontSize,
       color: color,
-    ));
+    ),
+    softWrap: softWrap,);
   }
 }

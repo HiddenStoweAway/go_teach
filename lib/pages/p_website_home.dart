@@ -100,105 +100,107 @@ class _WebHomePageState extends State<WebHomePage> {
 
   Widget featuresPage() {
     return Center(
-      child: Column(
-        children: [
-          SizedBox(height: 50),
-
-          Container(
-            width: 1000,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8.0,
-                vertical: 25.0,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(height: 50),
+        
+            Container(
+              width: 1000,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(5),
               ),
-              child: Column(
-                children: [
-                  MyTitle(text: "Feature 1: AI Direct Teaching", fontSize: 18),
-
-                  SizedBox(height: 15),
-
-                  Text(
-                    "LEALO directly connects the AI to the student, and teaches the student to their own pace."
-                    " While the curriculum is preset, the AI can pace out and assign to the student based off of how the student is doing,"
-                    " and will review with the student as it sees fit.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 15),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          SizedBox(height: 75),
-
-          Container(
-            width: 1000,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8.0,
-                vertical: 25.0,
-              ),
-              child: Column(
-                children: [
-                  MyTitle(text: "Feature 2: Teacher Dashboard", fontSize: 18),
-
-                  SizedBox(height: 15),
-
-                  Text(
-                    "LEALO has a teacher dashboard where every teacher can assign a topic to learn."
-                    " They are also able to track how each student is doing in their learning process with the strengths and weaknesses of each student.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 15),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                  vertical: 25.0,
+                ),
+                child: Column(
+                  children: [
+                    MyTitle(text: "Feature 1: AI Direct Teaching", fontSize: 18),
+        
+                    SizedBox(height: 15),
+        
+                    Text(
+                      "LEALO directly connects the AI to the student, and teaches the student to their own pace."
+                      " While the curriculum is preset, the AI can pace out and assign to the student based off of how the student is doing,"
+                      " and will review with the student as it sees fit.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 15),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-
-          SizedBox(height: 75),
-
-          Container(
-            width: 1000,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8.0,
-                vertical: 25.0,
+        
+            SizedBox(height: 75),
+        
+            Container(
+              width: 1000,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(5),
               ),
-              child: Column(
-                children: [
-                  MyTitle(
-                    text: "Feature 3: Natural Language Processing (NLP)",
-                    fontSize: 18,
-                  ),
-
-                  SizedBox(height: 15),
-
-                  Text(
-                    "LEALO's Artificial Intelligence uses NLP in order to process the text the user inputs."
-                    " It turns text into rough contextual meanings stored as directional vectors.  "
-                    " This way, the AI can process it because these vectors are just number."
-                    " It then spits back out new vectors that are turned back into text for the user."
-                    "",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 15),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                  vertical: 25.0,
+                ),
+                child: Column(
+                  children: [
+                    MyTitle(text: "Feature 2: Teacher Dashboard", fontSize: 18),
+        
+                    SizedBox(height: 15),
+        
+                    Text(
+                      "LEALO has a teacher dashboard where every teacher can assign a topic to learn."
+                      " They are also able to track how each student is doing in their learning process with the strengths and weaknesses of each student.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 15),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+        
+            SizedBox(height: 75),
+        
+            Container(
+              width: 1000,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 8.0,
+                  vertical: 25.0,
+                ),
+                child: Column(
+                  children: [
+                    MyTitle(
+                      text: "Feature 3: Natural Language Processing (NLP)",
+                      fontSize: 18,
+                    ),
+        
+                    SizedBox(height: 15),
+        
+                    Text(
+                      "LEALO's Artificial Intelligence uses NLP in order to process the text the user inputs."
+                      " It turns text into rough contextual meanings stored as directional vectors.  "
+                      " This way, the AI can process it because these vectors are just number."
+                      " It then spits back out new vectors that are turned back into text for the user."
+                      "",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 15),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

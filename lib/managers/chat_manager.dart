@@ -38,8 +38,9 @@ class ChatManager {
         'Only leave report fields as null if there is not yet enough data to assess.'
         'RESPONSE FORMAT: You must always respond in exactly this format and nothing else: '
         '<CONTENT>your message to the student here</CONTENT>'
-        '<REPORT>understanding=high/medium/low|strengths=...|weaknesses=...|progress=...</REPORT>'
-        'Make sure understanding is truly reflective of the understanding of specificallty the learning goal'
+        '<REPORT>understanding=complete/high/medium/low|strengths=...|weaknesses=...|progress=...</REPORT>'
+        'Make sure understanding is truly reflective of the understanding of the overall learning goal, and not just how they are doing in the moment'
+        'Only make understanding be complete when the student has finished their homework and is done learning this topic.'
         'Typing Standards: '
         '- When trying to speak of a number raised to an exponent, use "^", for example 4 squared is 4^2'
         'Leave report fields as "none" if there is not yet enough data yet.'
@@ -117,16 +118,28 @@ class ChatManager {
 
   Map<String, dynamic> _parseResponse(String raw) {
     try {
-      final contentMatch = RegExp(
-        r'<CONTENT>(.*?)<\/CONTENT>',
-        dotAll: true,
-      ).firstMatch(raw);
       final reportMatch = RegExp(
         r'<REPORT>(.*?)<\/REPORT>',
         dotAll: true,
       ).firstMatch(raw);
 
-      final content = contentMatch?.group(1)?.trim() ?? raw;
+      // try proper <CONTENT>...</CONTENT> first
+      final contentMatch = RegExp(
+        r'<CONTENT>(.*?)<\/CONTENT>',
+        dotAll: true,
+      ).firstMatch(raw);
+
+      String content;
+      if (contentMatch != null) {
+        // normal case - both tags present
+        content = contentMatch.group(1)!.trim();
+      } else if (raw.contains('</CONTENT>')) {
+        // gemini forgot the opening tag - grab everything before </CONTENT>
+        content = raw.split('</CONTENT>').first.trim();
+      } else {
+        // no tags at all - use full raw as content
+        content = raw.trim();
+      }
 
       Map<String, String>? report;
       if (reportMatch != null) {
@@ -134,10 +147,7 @@ class ChatManager {
         final fields = Map.fromEntries(
           reportStr.split('|').map((part) {
             final split = part.split('=');
-            return MapEntry(
-              split[0].trim(),
-              split.sublist(1).join('=').trim(),
-            );
+            return MapEntry(split[0].trim(), split.sublist(1).join('=').trim());
           }),
         );
         report = {
@@ -180,83 +190,72 @@ class ChatManager {
     return data['text'] as String? ?? '';
   }
 
-  Future<String> sendMessage(String classID, String message) async {
-    try {
-      // Pull current history fresh from Supabase right before sending.
-      // This is the only place history comes from - no separate state to drift.
-      final history = await getHistory(classID);
+Future<String> sendMessage(String classID, String message) async {
+  try {
+    await _saveMessage('user', message, classID); // save FIRST this time
 
-      String? raw;
+    String? raw;
 
-      if (!usingFallback) {
-        for (int i = 0; i < 3; i++) {
-          try {
-            raw = await _sendToEdgeFunction(message, history, _primaryModel);
-            break;
-          } catch (e) {
-            print(e);
-            if (e.toString().contains('503') && i < 2) {
-              await Future.delayed(Duration(seconds: i * 2));
-              continue;
-            } else if (i == 2) {
-              print("SWITCH");
-              usingFallback = true;
-              raw = await _sendToEdgeFunction(
-                message,
-                history,
-                _fallbackModel,
-              );
-            }
-          }
-        }
-      } else {
-        print("USING FALLBACK DEFAULT");
-
-        for (int i = 0; i <= 3; i++) {
-          try {
-            raw = await _sendToEdgeFunction(message, history, _fallbackModel);
-            break;
-          } catch (e) {
-            print(e);
-            if (e.toString().contains('503') && i < 3) {
-              await Future.delayed(Duration(seconds: i * 2));
-              continue;
-            } else if (i == 3) {
-              return 'both models failed to deliver response: $e';
-            }
+    if (!usingFallback) {
+      final history = await getHistory(classID); // fetch before primary attempts
+      for (int i = 0; i < 3; i++) {
+        try {
+          raw = await _sendToEdgeFunction(message, history, _primaryModel);
+          break;
+        } catch (e) {
+          print(e);
+          if (e.toString().contains('503') && i < 2) {
+            await Future.delayed(Duration(seconds: (i + 1) * 2));
+            continue;
+          } else if (i == 2) {
+            print("SWITCH");
+            usingFallback = true;
+            // re-fetch history fresh so fallback has the full up-to-date conversation
+            final freshHistory = await getHistory(classID);
+            raw = await _sendToEdgeFunction(message, freshHistory, _fallbackModel);
           }
         }
       }
-
-      // Save the user message AFTER fetching history above, so it's not
-      // accidentally double-counted in the history sent to Gemini.
-      await _saveMessage('user', message, classID);
-
-      final parsed = _parseResponse(raw ?? '');
-      final content = parsed['content'] as String;
-      final report = parsed['report'] as Map<String, String>?;
-
-      print(parsed);
-
-      if (report != null) {
-        await _saveReport(classID, report);
-        print(report);
+    } else {
+      print("USING FALLBACK DEFAULT");
+      final history = await getHistory(classID); // fresh fetch for fallback too
+      for (int i = 0; i <= 3; i++) {
+        try {
+          raw = await _sendToEdgeFunction(message, history, _fallbackModel);
+          break;
+        } catch (e) {
+          print(e);
+          if (e.toString().contains('503') && i < 3) {
+            await Future.delayed(Duration(seconds: (i + 1) * 2));
+            continue;
+          } else if (i == 3) {
+            return 'both models failed to deliver response: $e';
+          }
+        }
       }
-
-      await _saveMessage('model', content, classID);
-      return content;
-    } catch (e, stackTrace) {
-      print('ERROR: $e');
-      print('STACK: $stackTrace');
-      return 'error';
     }
-  }
 
-  Future<void> _saveMessage(
-    String role,
-    String content,
-    String classId,
-  ) async {
+    final parsed = _parseResponse(raw ?? '');
+    final content = parsed['content'] as String;
+    final report = parsed['report'] as Map<String, String>?;
+
+    print(parsed);
+
+    if (report != null) {
+      await _saveReport(classID, report);
+      print(report);
+    }
+
+    await _saveMessage('model', content, classID);
+    return content;
+  } catch (e, stackTrace) {
+    print('ERROR: $e');
+    print('STACK: $stackTrace');
+    return 'error';
+  }
+}
+
+  Future<void> _saveMessage(String role, String content, String classId) async {
     final userId = AuthManager.instance.currentUser()!.id;
     await Supabase.instance.client.from('messages').insert({
       'class_id': classId,
@@ -269,18 +268,15 @@ class ChatManager {
 
   Future<void> _saveReport(String classId, Map<String, String> report) async {
     final userId = Supabase.instance.client.auth.currentUser!.id;
-    await Supabase.instance.client.from('reports').upsert(
-      {
-        'class_id': classId,
-        'student_id': userId,
-        'current_learning_goal': target,
-        'understanding': report['understanding'],
-        'strengths': report['strengths'],
-        'weaknesses': report['weaknesses'],
-        'progress': report['progress'],
-        'updated_at': DateTime.now().toIso8601String(),
-      },
-      onConflict: 'class_id, student_id, current_learning_goal',
-    );
+    await Supabase.instance.client.from('reports').upsert({
+      'class_id': classId,
+      'student_id': userId,
+      'current_learning_goal': target,
+      'understanding': report['understanding'],
+      'strengths': report['strengths'],
+      'weaknesses': report['weaknesses'],
+      'progress': report['progress'],
+      'updated_at': DateTime.now().toIso8601String(),
+    }, onConflict: 'class_id, student_id, current_learning_goal');
   }
 }

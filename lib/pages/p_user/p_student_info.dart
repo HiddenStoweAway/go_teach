@@ -3,11 +3,12 @@ import 'package:adobe_app/widgets/title.dart';
 import 'package:flutter/material.dart';
 
 class StudentInfoPage extends StatefulWidget {
-  const StudentInfoPage(
-      {super.key,
-      required this.classID,
-      required this.studentID,
-      required this.reports});
+  const StudentInfoPage({
+    super.key,
+    required this.classID,
+    required this.studentID,
+    required this.reports,
+  });
 
   final String classID;
   final String studentID;
@@ -21,21 +22,23 @@ class _StudentInfoPageState extends State<StudentInfoPage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future:
-            Future.wait([ClassManager.instance.getUserInfo(widget.studentID)]),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
-          }
+      future: Future.wait([
+        ClassManager.instance.getUserInfo(widget.studentID),
+      ]),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        }
 
-          final studentInfo = snapshot.data![0];
+        final studentInfo = snapshot.data![0];
 
-          return Scaffold(
-            appBar: AppBar(
-              backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-              title: MyTitle(text: "${studentInfo['email']} Progress"),
-            ),
-            body: Center(
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            title: MyTitle(text: "${studentInfo['email']} Progress"),
+          ),
+          body: Center(
+            child: SingleChildScrollView(
               child: Column(
                 children: [
                   ...widget.reports.map((report) {
@@ -44,9 +47,9 @@ class _StudentInfoPageState extends State<StudentInfoPage> {
                       child: Container(
                         width: 1000,
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                            color:
-                                Theme.of(context).colorScheme.primaryContainer),
+                          borderRadius: BorderRadius.circular(15),
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.all(15.0),
                           child: Column(
@@ -56,17 +59,31 @@ class _StudentInfoPageState extends State<StudentInfoPage> {
                                 spacing: 10,
                                 children: [
                                   report['understanding'] == 'low'
-                                      ? Icon(Icons.assignment_late_rounded,
-                                          color: Colors.red)
+                                      ? Icon(
+                                          Icons.assignment_late_rounded,
+                                          color: Colors.red,
+                                        )
                                       : report['understanding'] == 'medium'
-                                          ? Icon(Icons.access_time,
-                                              color: Colors.orange)
-                                          : report['understanding'] == 'high'
-                                              ? Icon(Icons.check,
-                                                  color: Colors.green)
-                                              : Icon(Icons.question_mark),
+                                      ? Icon(
+                                          Icons.access_time,
+                                          color: Colors.orange,
+                                        )
+                                      : report['understanding'] == 'high'
+                                      ? Icon(
+                                          Icons.thumb_up,
+                                          color: Colors.green,
+                                        )
+                                      : report['understanding'] == 'complete'
+                                      ? Icon(
+                                          Icons.check,
+                                          color: Colors.blue,
+                                        )
+                                      : Icon(Icons.question_mark),
+
                                   MyTitle(
-                                      text: report['current_learning_goal']),
+                                    text: report['current_learning_goal'],
+                                    softWrap: true,
+                                  ),
                                 ],
                               ),
                               Row(
@@ -74,7 +91,12 @@ class _StudentInfoPageState extends State<StudentInfoPage> {
                                 spacing: 10,
                                 children: [
                                   MyTitle(text: "Strengths:"),
-                                  Expanded(child: Text(report['strengths'], softWrap: true,)),
+                                  Expanded(
+                                    child: Text(
+                                      report['strengths'],
+                                      softWrap: true,
+                                    ),
+                                  ),
                                 ],
                               ),
                               Row(
@@ -82,7 +104,12 @@ class _StudentInfoPageState extends State<StudentInfoPage> {
                                 spacing: 10,
                                 children: [
                                   MyTitle(text: "Weaknesses:"),
-                                  Expanded(child: Text(report['weaknesses'], softWrap: true)),
+                                  Expanded(
+                                    child: Text(
+                                      report['weaknesses'],
+                                      softWrap: true,
+                                    ),
+                                  ),
                                 ],
                               ),
                               Row(
@@ -90,7 +117,12 @@ class _StudentInfoPageState extends State<StudentInfoPage> {
                                 spacing: 10,
                                 children: [
                                   MyTitle(text: "Progress:"),
-                                  Expanded(child: Text(report['progress'], softWrap: true,)),
+                                  Expanded(
+                                    child: Text(
+                                      report['progress'],
+                                      softWrap: true,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ],
@@ -102,7 +134,9 @@ class _StudentInfoPageState extends State<StudentInfoPage> {
                 ],
               ),
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 }

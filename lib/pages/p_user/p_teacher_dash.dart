@@ -135,7 +135,9 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     ),
                     onTap: () async {
                       if (controller.text.isEmpty) {
-                        SnackBar snackBar = SnackBar(content: Text("Cannot leave goal empty"));
+                        SnackBar snackBar = SnackBar(
+                          content: Text("Cannot leave goal empty"),
+                        );
                         // ignore: use_build_context_synchronously
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
@@ -236,29 +238,31 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                                           return Icon(Icons.question_mark);
                                         }
 
-                                        if (reports[0]['current_learning_goal'] ==
-                                            target) {
-                                          if (reports[0]['understanding'] ==
-                                              'low') {
-                                            return Icon(
-                                              Icons.assignment_late_rounded,
-                                              color: Colors.red,
-                                            );
-                                          } else if (reports[0]['understanding'] ==
-                                              'medium') {
-                                            return Icon(
-                                              Icons.access_time,
-                                              color: Colors.orange,
-                                            );
-                                          } else if (reports[0]['understanding'] ==
-                                              'high') {
-                                            return Icon(
-                                              Icons.check,
-                                              color: Colors.green,
-                                            );
-                                          }
-                                        }
-                                        return Icon(Icons.question_mark);
+                                        return reports[0]['understanding'] ==
+                                                'low'
+                                            ? Icon(
+                                                Icons.assignment_late_rounded,
+                                                color: Colors.red,
+                                              )
+                                            : reports[0]['understanding'] ==
+                                                  'medium'
+                                            ? Icon(
+                                                Icons.access_time,
+                                                color: Colors.orange,
+                                              )
+                                            : reports[0]['understanding'] ==
+                                                  'high'
+                                            ? Icon(
+                                                Icons.thumb_up,
+                                                color: Colors.green,
+                                              )
+                                            : reports[0]['understanding'] ==
+                                                  'complete'
+                                            ? Icon(
+                                                Icons.check,
+                                                color: Colors.blue,
+                                              )
+                                            : Icon(Icons.question_mark);
                                       },
                                     ),
                                   ],
