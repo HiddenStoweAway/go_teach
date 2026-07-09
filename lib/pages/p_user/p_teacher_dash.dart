@@ -161,9 +161,33 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       MyTitle(text: "Students:", fontSize: 18),
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(Icons.info_outline),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          // color: Theme.of(context).colorScheme.primaryContainer,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                            children: [
+                              MyTitle(text: "Understanding icons: "),
+                              Text("Completed: "),
+                              Icon(Icons.check, color: Colors.blue),
+                          
+                              Text("High: "),
+                              Icon(Icons.thumb_up, color: Colors.green),
+                          
+                              Text("Medium: "),
+                              Icon(Icons.access_time, color: Colors.orange),
+                          
+                              Text("Low: "),
+                              Icon(
+                                Icons.assignment_late_rounded,
+                                color: Colors.red,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
                   ),
