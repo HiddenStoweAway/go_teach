@@ -109,10 +109,12 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                             ConnectionState.waiting) {
                           return CircularProgressIndicator();
                         }
-
+                        
+                        if(snapshot.data != null){
                         controller.text = snapshot.data!;
+                        }
 
-                        return MyTextField(controller: controller);
+                        return MyTextField(controller: controller, hintText: "Current Learning Idea");
                       },
                     ),
                   ),
