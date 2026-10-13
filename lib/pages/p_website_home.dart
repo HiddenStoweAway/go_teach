@@ -1,20 +1,135 @@
-import 'package:adobe_app/pages/p_auth/p_login.dart';
+import 'package:adobe_app/managers/auth_manager.dart';
 import 'package:adobe_app/widgets/title.dart';
 import 'package:flutter/material.dart';
 
-class WebHomePage extends StatefulWidget {
-  const WebHomePage({super.key, required this.title});
-
-  final String title;
+class HomeAppBar extends StatefulWidget implements PreferredSizeWidget {
+  const HomeAppBar({super.key});
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   @override
-  State<WebHomePage> createState() => _WebHomePageState();
+  State<HomeAppBar> createState() => _HomeAppBarState();
 }
 
-class _WebHomePageState extends State<WebHomePage> {
-  int pageIndex = 0;
+class _HomeAppBarState extends State<HomeAppBar> {
+  @override
+  @override
+  Widget build(BuildContext context) {
+    final currentUser = AuthManager.instance.currentUser();
 
-  Widget mainHomePage() {
+    return AppBar(
+      automaticallyImplyLeading: false,
+      backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      title: TextButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/');
+        },
+        child: SizedBox(
+          width: 150,
+          child: Row(
+            children: [
+              Image(
+                image: AssetImage('assets/logo-125x125.png'),
+                height: 50,
+                fit: BoxFit.contain,
+              ),
+              SizedBox(width: 10),
+              MyTitle(text: "LEALO", fontSize: 25),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        /*
+          // THE GOAL PAGE BUTTON
+          TextButton(
+            onPressed: () {
+              setState(() {
+                pageIndex = 2;
+              });
+            },
+            child: Text("The Goal"),
+          ),
+
+          // FEATURES PAGE BUTTON
+          TextButton(
+            onPressed: () {
+              setState(() {
+                pageIndex = 1;
+              });
+            },
+            child: Text("Features"),
+          ),
+          */
+
+        // LOGIN PAGE BUTTOn
+        currentUser == null
+            ? TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/login');
+                },
+                child: Text("Login / Signup"),
+              )
+            : PopupMenuButton<String>(
+                onSelected: (value) {
+                  setState(() {
+                    AuthManager.instance.signOut();
+                  });
+                },
+                itemBuilder: (context) => const [
+                  PopupMenuItem(value: 'LOG OUT', child: Text('Log Out')),
+                ],
+                child: Text(currentUser.email!),
+              ),
+
+        // CONTACT PAGE BUTTOn
+        TextButton(
+          onPressed: () {
+            Navigator.pushNamed(context, '/contact');
+          },
+          child: Text("Contact"),
+        ),
+      ],
+    );
+  }
+}
+
+class ContactPage extends StatelessWidget {
+  const ContactPage({super.key});
+
+  Widget contactPage(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(100),
+              child: MyTitle(
+                text:
+                    "To learn more about the SDG, go to https://sdgs.un.org/goals/goal4 or email otocassius@gmail.com",
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(appBar: HomeAppBar(), body: contactPage(context));
+  }
+}
+
+class WebHomePage extends StatelessWidget {
+  const WebHomePage({super.key});
+
+  Widget mainHomePage(BuildContext context) {
     return Center(
       // Center is a layout widget. It takes a single child and positions it
       // in the middle of the parent.
@@ -98,6 +213,7 @@ class _WebHomePageState extends State<WebHomePage> {
     );
   }
 
+  /*
   Widget featuresPage() {
     return Center(
       child: SingleChildScrollView(
@@ -287,108 +403,11 @@ class _WebHomePageState extends State<WebHomePage> {
       ),
     );
   }
-
-  Widget contactPage() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(100),
-              child: MyTitle(
-                text:
-                    "To learn more about the SDG, go to https://sdgs.un.org/goals/goal4 or email otocassius@gmail.com",
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  */
 
   @override
   Widget build(BuildContext context) {
-    final pages = {
-      0: mainHomePage(),
-      1: featuresPage(),
-      2: goalPage(),
-      5: LoginPage(),
-      6: contactPage(),
-    };
-
     // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: TextButton(
-          onPressed: () {
-            setState(() {
-              pageIndex = 0;
-            });
-          },
-          child: SizedBox(
-            width: 150,
-            child: Row(
-              children: [
-                Image(
-                  image: AssetImage('assets/logo.png'),
-                  height: 50,
-                  fit: BoxFit.contain,
-                ),
-                SizedBox(width: 10),
-                MyTitle(text: widget.title, fontSize: 25),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          // THE GOAL PAGE BUTTON
-          TextButton(
-            onPressed: () {
-              setState(() {
-                pageIndex = 2;
-              });
-            },
-            child: Text("The Goal"),
-          ),
-
-          // FEATURES PAGE BUTTON
-          TextButton(
-            onPressed: () {
-              setState(() {
-                pageIndex = 1;
-              });
-            },
-            child: Text("Features"),
-          ),
-
-          // LOGIN PAGE BUTTOn
-          TextButton(
-            onPressed: () {
-              setState(() {
-                pageIndex = 5;
-              });
-            },
-            child: Text("Login / Signup"),
-          ),
-
-          // CONTACT PAGE BUTTOn
-          TextButton(
-            onPressed: () {
-              setState(() {
-                pageIndex = 6;
-              });
-            },
-            child: Text("Contact"),
-          ),
-        ],
-      ),
-      body: pages[pageIndex],
-    );
+    return Scaffold(appBar: HomeAppBar(), body: mainHomePage(context));
   }
 }

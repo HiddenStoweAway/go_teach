@@ -35,7 +35,7 @@ class Signup extends StatelessWidget {
       await auth.signUp(emailController.text, passwordController.text);
 
       // ignore: use_build_context_synchronously
-      Navigator.pop(context);
+      Navigator.pushNamed(context, "/");
     } on AuthException catch (e) {
       SnackBar snackBar = SnackBar(content: Text(e.message));
 

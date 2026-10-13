@@ -1,10 +1,15 @@
-import 'package:adobe_app/managers/auth_manager.dart';
+import 'package:adobe_app/pages/p_auth/p_login.dart';
+import 'package:adobe_app/pages/p_auth/p_signup.dart';
+import 'package:adobe_app/pages/p_website_home.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'api_keys.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  usePathUrlStrategy();
 
   final keys = ApiKeys.instance;
 
@@ -25,13 +30,20 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'LEALO',
 
+      initialRoute: '/',
+      routes: {
+        '/': (context) => WebHomePage(),
+        '/contact': (context) => ContactPage(),
+        '/login': (context) => LoginPage(),
+        '/register': (context) => Signup(),
+      },
+
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color.fromARGB(255, 126, 167, 255),
         ),
       ),
       debugShowCheckedModeBanner: false,
-      home: AuthManager.instance.authGate(),
     );
   }
 }

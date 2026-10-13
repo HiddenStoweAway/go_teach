@@ -1,5 +1,5 @@
 import 'package:adobe_app/managers/auth_manager.dart';
-import 'package:adobe_app/pages/p_auth/p_signup.dart';
+import 'package:adobe_app/pages/p_website_home.dart';
 import 'package:adobe_app/widgets/text_field.dart';
 import 'package:adobe_app/widgets/title.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +21,8 @@ class _LoginPageState extends State<LoginPage> {
       final auth = AuthManager.instance;
 
       await auth.signIn(emailController.text, passwordController.text);
+
+      Navigator.pushNamed(context, "/");
     }
     on AuthException catch (e){
       SnackBar snackBar = SnackBar(content: Text(e.message));
@@ -33,6 +35,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: HomeAppBar(),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(50.0),
@@ -92,10 +95,7 @@ class _LoginPageState extends State<LoginPage> {
                   Text("Don't Have An Account? "),
                   TextButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute<void>(builder: (context) => Signup()),
-                      );
+                      Navigator.pushNamed(context, "/register");
                     },
                     child: Text(
                       "Sign Up!",
