@@ -72,12 +72,18 @@ class _HomeAppBarState extends State<HomeAppBar> {
               )
             : PopupMenuButton<String>(
                 onSelected: (value) {
-                  setState(() {
-                    AuthManager.instance.signOut();
-                  });
+                  if (value == "LOGOUT"){
+                    setState(() {
+                      AuthManager.instance.signOut();
+                    });
+                  }
+                  else if (value == "DASHBOARD"){
+                    Navigator.pushNamed(context, "/dashboard");
+                  }
                 },
                 itemBuilder: (context) => const [
-                  PopupMenuItem(value: 'LOG OUT', child: Text('Log Out')),
+                  PopupMenuItem(value: 'DASHBOARD', child: Text('My Dashboard')),
+                  PopupMenuItem(value: 'LOGOUT', child: Text('Log Out')),
                 ],
                 child: Text(currentUser.email!),
               ),

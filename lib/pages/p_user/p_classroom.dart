@@ -1,3 +1,4 @@
+import 'package:adobe_app/managers/auth_manager.dart';
 import 'package:adobe_app/managers/chat_manager.dart';
 import 'package:adobe_app/managers/class_manager.dart';
 import 'package:adobe_app/widgets/title.dart';
@@ -77,6 +78,19 @@ class _ClassroomPageState extends State<ClassroomPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (AuthManager.instance.currentUser() == null){
+      return Scaffold(
+        body: Column(
+          children: [
+            Text("NOT SIGNED IN"),
+            TextButton(onPressed: (){
+              Navigator.pushNamed(context, "/login");
+            }, child: Text("Return to login"))
+          ],
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,

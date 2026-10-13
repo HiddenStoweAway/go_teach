@@ -1,5 +1,6 @@
 import 'package:adobe_app/pages/p_auth/p_login.dart';
 import 'package:adobe_app/pages/p_auth/p_signup.dart';
+import 'package:adobe_app/pages/p_user/p_user.dart';
 import 'package:adobe_app/pages/p_website_home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
         '/contact': (context) => ContactPage(),
         '/login': (context) => LoginPage(),
         '/register': (context) => Signup(),
+        '/dashboard': (context) => UserPage()
       },
 
       theme: ThemeData(
