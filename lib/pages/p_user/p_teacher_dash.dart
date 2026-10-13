@@ -6,14 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class TeacherDashboardPage extends StatefulWidget {
-  const TeacherDashboardPage({
-    super.key,
-    required this.classId,
-    required this.className,
-  });
+  const TeacherDashboardPage({super.key, required this.classId});
 
   final String classId;
-  final String className;
 
   @override
   State<TeacherDashboardPage> createState() => _TeacherDashboardPageState();
@@ -22,21 +17,26 @@ class TeacherDashboardPage extends StatefulWidget {
 class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
   final controller = TextEditingController();
 
+  String getClassName(Map<String, dynamic> classInfo) {
+    return classInfo['class_id'].replaceAll(classInfo['owner_id'], "");
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: MyTitle(text: widget.className),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          FutureBuilder(
-            future: ClassManager.instance.getClassInfo(widget.classId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return CircularProgressIndicator();
-              }
+    return FutureBuilder(
+      future: ClassManager.instance.getClassInfo(widget.classId),
+      builder: (context, snapshot) {
+        if(!snapshot.hasData){
+          return CircularProgressIndicator();
+        }
 
-              return TextButton(
+        final studentIDS = snapshot.data?['students'];
+        return Scaffold(
+          appBar: AppBar(
+            title: MyTitle(text: getClassName(snapshot.data!)),
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            actions: [
+              TextButton(
                 onPressed: () async {
                   await showDialog<void>(
                     context: context,
@@ -76,20 +76,10 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                   );
                 },
                 child: MyTitle(text: snapshot.data!['join_code'], fontSize: 15),
-              );
-            },
+              ),
+            ],
           ),
-        ],
-      ),
-      body: FutureBuilder(
-        future: ClassManager.instance.getClassInfo(widget.classId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator();
-          }
-
-          final studentIDS = snapshot.data?['students'];
-          return SingleChildScrollView(
+          body: SingleChildScrollView(
             child: Center(
               child: Column(
                 children: [
@@ -109,12 +99,15 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                             ConnectionState.waiting) {
                           return CircularProgressIndicator();
                         }
-                        
-                        if(snapshot.data != null){
-                        controller.text = snapshot.data!;
+
+                        if (snapshot.data != null) {
+                          controller.text = snapshot.data!;
                         }
 
-                        return MyTextField(controller: controller, hintText: "Current Learning Idea");
+                        return MyTextField(
+                          controller: controller,
+                          hintText: "Current Learning Idea",
+                        );
                       },
                     ),
                   ),
@@ -175,13 +168,13 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                               MyTitle(text: "Understanding icons: "),
                               Text("Completed: "),
                               Icon(Icons.check, color: Colors.blue),
-                          
+
                               Text("High: "),
                               Icon(Icons.thumb_up, color: Colors.green),
-                          
+
                               Text("Medium: "),
                               Icon(Icons.access_time, color: Colors.orange),
-                          
+
                               Text("Low: "),
                               Icon(
                                 Icons.assignment_late_rounded,
@@ -257,8 +250,8 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                                         final reports =
                                             snapshot.data![0]
                                                 as List<Map<String, dynamic>>;
-                                        final target =
-                                            snapshot.data![1] as String;
+                                        // final target =
+                                        //     snapshot.data![1] as String;
 
                                         if (reports.isEmpty) {
                                           return Icon(Icons.question_mark);
@@ -303,9 +296,9 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                 ],
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

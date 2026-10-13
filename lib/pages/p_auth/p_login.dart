@@ -1,4 +1,5 @@
 import 'package:adobe_app/managers/auth_manager.dart';
+import 'package:adobe_app/managers/mynav.dart';
 import 'package:adobe_app/pages/p_website_home.dart';
 import 'package:adobe_app/widgets/text_field.dart';
 import 'package:adobe_app/widgets/title.dart';
@@ -22,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
 
       await auth.signIn(emailController.text, passwordController.text);
 
-      Navigator.pushNamed(context, "/");
+      Nav.go(context, "/");
     }
     on AuthException catch (e){
       SnackBar snackBar = SnackBar(content: Text(e.message));
@@ -95,7 +96,7 @@ class _LoginPageState extends State<LoginPage> {
                   Text("Don't Have An Account? "),
                   TextButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, "/register");
+                      Nav.go(context, "/register");
                     },
                     child: Text(
                       "Sign Up!",

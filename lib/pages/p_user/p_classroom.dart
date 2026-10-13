@@ -1,4 +1,3 @@
-import 'package:adobe_app/managers/auth_manager.dart';
 import 'package:adobe_app/managers/chat_manager.dart';
 import 'package:adobe_app/managers/class_manager.dart';
 import 'package:adobe_app/widgets/title.dart';
@@ -10,11 +9,9 @@ class ClassroomPage extends StatefulWidget {
   const ClassroomPage({
     super.key,
     required this.classId,
-    required this.className,
   });
 
   final String classId;
-  final String className;
 
   @override
   State<ClassroomPage> createState() => _ClassroomPageState();
@@ -39,7 +36,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
 
     setState(() {
       messages.removeLast();
-      print(_chatManager);
+      print("30: $_chatManager");
       messages.add({'role': 'model', 'text': response!});
     });
   }
@@ -64,7 +61,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
         .eq('user_id', userId)
         .eq('current_learning_goal', target)
         .order('created_at', ascending: true);
-    print(rows);
+    print("31: $rows");
 
     setState(() {
       messages = rows
@@ -76,25 +73,28 @@ class _ClassroomPageState extends State<ClassroomPage> {
     });
   }
 
+  Future<String> getClassName() async {
+    final info = await ClassManager.instance.getClassInfo(widget.classId);
+
+    return info['class_id'].replaceAll(info['owner_id'], "");
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (AuthManager.instance.currentUser() == null){
-      return Scaffold(
-        body: Column(
-          children: [
-            Text("NOT SIGNED IN"),
-            TextButton(onPressed: (){
-              Navigator.pushNamed(context, "/login");
-            }, child: Text("Return to login"))
-          ],
-        ),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: MyTitle(text: widget.className),
+        title: FutureBuilder(
+          future: getClassName(),
+          builder: (context, asyncSnapshot) {
+            if(asyncSnapshot.hasData){
+              return MyTitle(text: asyncSnapshot.data);
+            }
+            else{
+              return CircularProgressIndicator();
+            }
+          }
+        ),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())

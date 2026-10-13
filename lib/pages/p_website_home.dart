@@ -1,4 +1,5 @@
 import 'package:adobe_app/managers/auth_manager.dart';
+import 'package:adobe_app/managers/mynav.dart';
 import 'package:adobe_app/widgets/title.dart';
 import 'package:flutter/material.dart';
 
@@ -22,7 +23,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
       backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       title: TextButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/');
+          Nav.go(context, '/');
         },
         child: SizedBox(
           width: 150,
@@ -66,7 +67,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
         currentUser == null
             ? TextButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/login');
+                  Nav.go(context, '/login');
                 },
                 child: Text("Login / Signup"),
               )
@@ -78,7 +79,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
                     });
                   }
                   else if (value == "DASHBOARD"){
-                    Navigator.pushNamed(context, "/dashboard");
+                    Nav.go(context, "/dashboard");
                   }
                 },
                 itemBuilder: (context) => const [
@@ -91,7 +92,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
         // CONTACT PAGE BUTTOn
         TextButton(
           onPressed: () {
-            Navigator.pushNamed(context, '/contact');
+            Nav.go(context, '/contact');
           },
           child: Text("Contact"),
         ),

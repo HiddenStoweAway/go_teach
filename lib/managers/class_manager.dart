@@ -16,7 +16,7 @@ class ClassManager {
     try{
       await supabase.from("classes").update({"current_learning_goal": target}).eq("class_id", classID);
     } on PostgrestException catch(e) {
-      print(e.message);
+      print("17: ${e.message}");
     }
     return;
   }
@@ -26,14 +26,14 @@ class ClassManager {
       final target = await supabase.from("classes").select().eq("class_id", classID).single();
       return target['current_learning_goal'];
     } on PostgrestException catch(e){
-      print(e.message);
+      print("18: ${e.message}");
       return e.message;
     }
   }
 
   Future<List<Map<String, dynamic>>> getUserReports(String userID) async {
     final report = await supabase.from('reports').select().eq('student_id', userID).order('created_at');
-    print(report);
+    print("19: $report");
 
     return report;
   }
@@ -54,9 +54,9 @@ class ClassManager {
 
       return List<String>.from(data.single['classes'] ?? []);
     } on PostgrestException catch (e) {
-      print(e.message);
+      print("20: ${e.message}");
     } catch (e) {
-      print("other error: $e"); // add this
+      print("21: other error: $e"); // add this
     }
 
     return ["error fetching classes"];
@@ -104,9 +104,9 @@ class ClassManager {
         'owner_id': currentUser.id,
       });
     } on PostgrestException catch (e) {
-      print(e.message);
+      print("22: ${e.message}");
     } catch (e) {
-      print("other error: $e"); // add this
+      print("23: other error: $e"); // add this
     }
   }
 
@@ -126,9 +126,9 @@ class ClassManager {
 
       return List<String>.from(data.single['joined_classes'] ?? []);
     } on PostgrestException catch (e) {
-      print(e.message);
+      print("24: ${e.message}");
     } catch (e) {
-      print("other error: $e"); // add this
+      print("25: other error: $e"); // add this
     }
 
     return ["error fetching classes"];
@@ -191,10 +191,10 @@ class ClassManager {
           .update({'joined_classes': classes})
           .eq("user_id", currentUser.id);
     } on PostgrestException catch (e) {
-      print(e.message);
+      print("26: ${e.message}");
       return e.message;
     } catch (e) {
-      print("Other error: $e");
+      print("27: Other error: $e");
       return "Other error: $e";
     }
 
@@ -208,9 +208,11 @@ class ClassManager {
           .select()
           .eq("class_id", classID)
           .single();
+
+      print("28: $data");
       return Map.from(data);
     } on PostgrestException catch (e) {
-      print(e.message);
+      print("29 ${e.message}");
     }
 
     return {"error": "error fetching info"};

@@ -108,20 +108,20 @@ class ChatManager {
           );
           break;
         } catch (e) {
-          print(e);
-          print("Using Fallback: $usingFallback");
+          print("1: $e");
+          print("2: Using Fallback: $usingFallback");
           if (e.toString().contains('503') && i < 2) {
             await Future.delayed(Duration(seconds: i * 2));
             continue;
           } else if (i == 2) {
-            print("SWITCH");
+            print("3: SWITCH");
             usingFallback = true;
             raw = await _sendToEdgeFunction("Hello", [], _fallbackModel);
           }
         }
       }
 
-      print(raw);
+      print("4: $raw");
 
       final parsed = _parseResponse(raw ?? '');
       final content = parsed['content'] as String;
@@ -135,7 +135,7 @@ class ChatManager {
   Future<List<Map<String, dynamic>>> getHistory(String classId) async {
     try {
       final userId = Supabase.instance.client.auth.currentUser!.id;
-      print(target);
+      print("15: $target");
       final rows = await Supabase.instance.client
           .from('messages')
           .select()
@@ -157,7 +157,7 @@ class ChatManager {
           )
           .toList();
     } on PostgrestException catch (e) {
-      print(e.message);
+      print("5: ${e.message}");
     }
 
     return [];
@@ -207,7 +207,7 @@ class ChatManager {
 
       return {'content': content, 'report': report};
     } catch (e) {
-      print('Parse error: $e');
+      print('6: Parse error: $e');
       return {'content': raw, 'report': null};
     }
   }
@@ -250,13 +250,13 @@ class ChatManager {
             raw = await _sendToEdgeFunction(message, history, _primaryModel);
             break;
           } catch (e) {
-            print(e);
-            print("Using Fallback: $usingFallback");
+            print("7: $e");
+            print("8: Using Fallback: $usingFallback");
             if (e.toString().contains('503') && i < 2) {
               await Future.delayed(Duration(seconds: (i + 1) * 2));
               continue;
             } else if (i == 2) {
-              print("SWITCH");
+              print("9: SWITCH");
               usingFallback = true;
               // re-fetch history fresh so fallback has the full up-to-date conversation
               final freshHistory = await getHistory(classID);
@@ -269,7 +269,7 @@ class ChatManager {
           }
         }
       } else {
-        print("USING FALLBACK DEFAULT");
+        print("10: USING FALLBACK DEFAULT");
         final history = await getHistory(
           classID,
         ); // fresh fetch for fallback too
@@ -278,7 +278,7 @@ class ChatManager {
             raw = await _sendToEdgeFunction(message, history, _fallbackModel);
             break;
           } catch (e) {
-            print(e);
+            print("16: $e");
             if (e.toString().contains('503') && i < 3) {
               await Future.delayed(Duration(seconds: (i + 1) * 2));
               continue;
@@ -293,19 +293,19 @@ class ChatManager {
       final content = parsed['content'] as String;
       final report = parsed['report'] as Map<String, String>?;
 
-      print(parsed);
+      print("11: $parsed");
 
       if (report != null) {
         await _saveReport(classID, report);
-        print(report);
+        print("12: $report");
       }
       await _saveMessage('user', message, classID); // save FIRST this time
 
       await _saveMessage('model', content, classID);
       return content;
     } catch (e, stackTrace) {
-      print('ERROR: $e');
-      print('STACK: $stackTrace');
+      print('13: ERROR: $e');
+      print('14: STACK: $stackTrace');
       return 'error';
     }
   }

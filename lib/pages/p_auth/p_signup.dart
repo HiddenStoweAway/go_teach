@@ -1,4 +1,5 @@
 import 'package:adobe_app/managers/auth_manager.dart';
+import 'package:adobe_app/managers/mynav.dart';
 import 'package:adobe_app/widgets/text_field.dart';
 import 'package:adobe_app/widgets/title.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,7 @@ class Signup extends StatelessWidget {
       await auth.signUp(emailController.text, passwordController.text);
 
       // ignore: use_build_context_synchronously
-      Navigator.pushNamed(context, "/");
+      Nav.go(context, "/");
     } on AuthException catch (e) {
       SnackBar snackBar = SnackBar(content: Text(e.message));
 
