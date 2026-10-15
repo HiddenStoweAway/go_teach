@@ -40,17 +40,8 @@ class _HomeAppBarState extends State<HomeAppBar> {
         ),
       ),
       actions: [
+        // THE GOAL PAGE BUTTON
         /*
-          // THE GOAL PAGE BUTTON
-          TextButton(
-            onPressed: () {
-              setState(() {
-                pageIndex = 2;
-              });
-            },
-            child: Text("The Goal"),
-          ),
-
           // FEATURES PAGE BUTTON
           TextButton(
             onPressed: () {
@@ -72,21 +63,30 @@ class _HomeAppBarState extends State<HomeAppBar> {
               )
             : PopupMenuButton<String>(
                 onSelected: (value) {
-                  if (value == "LOGOUT"){
+                  if (value == "LOGOUT") {
                     setState(() {
                       AuthManager.instance.signOut();
                     });
-                  }
-                  else if (value == "DASHBOARD"){
+                  } else if (value == "DASHBOARD") {
                     Nav.go(context, "/dashboard");
                   }
                 },
                 itemBuilder: (context) => const [
-                  PopupMenuItem(value: 'DASHBOARD', child: Text('My Dashboard')),
+                  PopupMenuItem(
+                    value: 'DASHBOARD',
+                    child: Text('My Dashboard'),
+                  ),
                   PopupMenuItem(value: 'LOGOUT', child: Text('Log Out')),
                 ],
                 child: Text(currentUser.email!),
               ),
+
+        TextButton(
+          onPressed: () {
+            Nav.go(context, "/about");
+          },
+          child: Text("About"),
+        ),
 
         // CONTACT PAGE BUTTOn
         TextButton(
@@ -132,6 +132,131 @@ class ContactPage extends StatelessWidget {
   }
 }
 
+class GoalPage extends StatelessWidget {
+  const GoalPage({super.key});
+
+  Widget goalPage(BuildContext context) {
+    return Center(
+      // Center is a layout widget. It takes a single child and positions it
+      // in the middle of the parent.
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 15.0),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(height: 50),
+          
+              MyTitle(text: "Sustainable Development Goal 4", fontSize: 18.0),
+          
+              SizedBox(height: 15),
+          
+              Container(
+                width: 1000,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 25.0,
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        '"Ensure inclusive and equitable quality education and promote lifelong learning opportunities for all"\n'
+                        '- United Nations SDG 4',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(),
+                      ),
+                      SizedBox(height: 15),
+          
+                      MyTitle(text: "What it means: "),
+                      Text(
+                        'All students should get not just equal education, but the education they need.'
+                        ' When one student is falling behind, they should get the individual attention they need.'
+                        ' This way, each student recieves a valuable education where all end up with the same knowledge, just with different individual paths taken.',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          
+              SizedBox(height: 50),
+          
+              MyTitle(text: "Where LEALO Comes In: ", fontSize: 18.0),
+          
+              SizedBox(height: 15),
+          
+              Container(
+                width: 1000,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 25.0,
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        "LEALO Supports SDG 4 by giving each student an individual teacher's assistant,"
+                        " that teaches a material to the student, answers answers any questions, and makes sure the student understands."
+                        " It is used as a tool for the teacher to enable them to spread their influence."
+                        " LEALO will additionally report back to the teacher any areas of struggle that the teacher can address in the classroom.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 50),
+          
+              MyTitle(text: "About: ", fontSize: 18.0),
+          
+              SizedBox(height: 15),
+              Container(
+                width: 1000,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 25.0,
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        "Lealo is made completely by me, Cash Oto. It is supported by Google's Gemini AI and Supabase Database."
+                        " It was made with the goal that students could learn more individually "
+                        "and at their own pace to support themselves, while teaching them good habits on how to learn effectively."
+                        " It is inspired by some classes I have had or my friends have had, that were either extremely slow paced and easier, or extremely fast and hard to understand."
+                        " LEALO aims to fix those problems.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(appBar: HomeAppBar(), body: goalPage(context));
+  }
+}
+
 class WebHomePage extends StatelessWidget {
   const WebHomePage({super.key});
 
@@ -141,79 +266,81 @@ class WebHomePage extends StatelessWidget {
       // in the middle of the parent.
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 15.0),
-        child: Column(
-          children: [
-            SizedBox(height: 50),
-
-            MyTitle(
-              text: "Welcome to LEALO",
-              fontSize: 30,
-              color: Theme.of(context).primaryColor,
-            ),
-
-            SizedBox(height: 15),
-
-            Container(
-              width: 1000,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(5),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(height: 50),
+          
+              MyTitle(
+                text: "Welcome to LEALO",
+                fontSize: 30,
+                color: Theme.of(context).primaryColor,
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8.0,
-                  vertical: 25.0,
+          
+              SizedBox(height: 15),
+          
+              Container(
+                width: 1000,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(5),
                 ),
-                child: Column(
-                  children: [
-                    Text(
-                      "LEALO is devoted to raising the equity in education in schools"
-                      " without enough teachers so that students get the support they need.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            SizedBox(height: 50),
-
-            MyTitle(text: "Sustainable Development Goal 4", fontSize: 18.0),
-
-            SizedBox(height: 15),
-
-            Container(
-              width: 1000,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8.0,
-                  vertical: 25.0,
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      "SDG 4 is all about equitable education in schools."
-                      "This means giving all students the education they need in order to thrive and learn appropriately. "
-                      "\nThe goal is to make it so all students recieve the individual attention they need from a teacher in order to learn at their own pace\n",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(),
-                    ),
-
-                    MyTitle(text: "The Problem: "),
-                    Text(
-                      "Right now U.S schools are underfunded, and there's not enough teachers. "
-                      "Teachers have to focus on 20+ kids who all have different levels of background knowledge who learn at different paces. ",
-                    ),
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 25.0,
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        "LEALO is devoted to raising the equity in education in schools"
+                        " without enough teachers so that students get the support they need.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+          
+              SizedBox(height: 50),
+          
+              MyTitle(text: "Sustainable Development Goal 4", fontSize: 18.0),
+          
+              SizedBox(height: 15),
+          
+              Container(
+                width: 1000,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 25.0,
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        "SDG 4 is all about equitable education in schools."
+                        "This means giving all students the education they need in order to thrive and learn appropriately. "
+                        "\nThe goal is to make it so all students recieve the individual attention they need from a teacher in order to learn at their own pace\n",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(),
+                      ),
+          
+                      MyTitle(text: "The Problem: "),
+                      Text(
+                        "Right now U.S schools are underfunded, and there's not enough teachers. "
+                        "Teachers have to focus on 20+ kids who all have different levels of background knowledge who learn at different paces. ",
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

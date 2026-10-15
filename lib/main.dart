@@ -44,6 +44,7 @@ class MyApp extends StatelessWidget {
       routes: [
         GoRoute(path: '/', builder: (context, state) => const WebHomePage()),
         GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
+        GoRoute(path: '/about', builder: (context, state) => const GoalPage()),
         GoRoute(path: '/register', builder: (context, state) => Signup()),
         GoRoute(
           path: '/contact',
