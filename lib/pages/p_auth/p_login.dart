@@ -16,21 +16,23 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  bool signInStarted = false;
 
   void signIn(BuildContext context) async {
-    try{
+    signInStarted = true;
+    try {
       final auth = AuthManager.instance;
 
       await auth.signIn(emailController.text, passwordController.text);
 
       Nav.go(context, "/");
-    }
-    on AuthException catch (e){
+    } on AuthException catch (e) {
       SnackBar snackBar = SnackBar(content: Text(e.message));
 
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
+    signInStarted = false;
   }
 
   @override
@@ -51,10 +53,7 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  MyTitle(
-                    text: "Enter your credentials: ",
-                    fontSize: 18,
-                  ),
+                  MyTitle(text: "Enter your credentials: ", fontSize: 18),
 
                   SizedBox(height: 75),
 
@@ -75,7 +74,9 @@ class _LoginPageState extends State<LoginPage> {
                   // SUBMIT BUTTON
                   GestureDetector(
                     onTap: () {
-                      signIn(context);
+                      if (!signInStarted) {
+                        signIn(context);
+                      }
                     },
                     child: Container(
                       height: 50,

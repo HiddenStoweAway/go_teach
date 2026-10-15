@@ -1,15 +1,13 @@
 import 'package:adobe_app/managers/chat_manager.dart';
 import 'package:adobe_app/managers/class_manager.dart';
+import 'package:adobe_app/managers/mynav.dart';
 import 'package:adobe_app/widgets/title.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ClassroomPage extends StatefulWidget {
-  const ClassroomPage({
-    super.key,
-    required this.classId,
-  });
+  const ClassroomPage({super.key, required this.classId});
 
   final String classId;
 
@@ -87,13 +85,22 @@ class _ClassroomPageState extends State<ClassroomPage> {
         title: FutureBuilder(
           future: getClassName(),
           builder: (context, asyncSnapshot) {
-            if(asyncSnapshot.hasData){
+            if (asyncSnapshot.hasData) {
               return MyTitle(text: asyncSnapshot.data);
-            }
-            else{
+            } else {
               return CircularProgressIndicator();
             }
-          }
+          },
+        ),
+        leading: IconButton(
+          onPressed: () {
+            Nav.go(context, '/');
+          },
+          icon: Image(
+            image: AssetImage('assets/logo-500x500.png'),
+            height: 100,
+            fit: BoxFit.contain,
+          ),
         ),
       ),
       body: _loading
@@ -118,7 +125,9 @@ class _ClassroomPageState extends State<ClassroomPage> {
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: isUser
-                                  ? Theme.of(context).colorScheme.primaryContainer
+                                  ? Theme.of(
+                                      context,
+                                    ).colorScheme.primaryContainer
                                   : Colors.grey[200],
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -126,7 +135,9 @@ class _ClassroomPageState extends State<ClassroomPage> {
                               data: message['text']!,
                               styleSheet: MarkdownStyleSheet(
                                 p: TextStyle(
-                                  color: isUser ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.primary,
+                                  color: isUser
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.primary,
                                 ),
                                 strong: TextStyle(
                                   color: isUser ? Colors.white : Colors.black87,
@@ -164,7 +175,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
                       const SizedBox(width: 8),
                       IconButton.filled(
                         onPressed: () => sendMessage(controller.text),
-                        icon: const Icon(Icons.send)
+                        icon: const Icon(Icons.send),
                       ),
                     ],
                   ),

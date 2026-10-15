@@ -1,4 +1,5 @@
 import 'package:adobe_app/managers/class_manager.dart';
+import 'package:adobe_app/managers/mynav.dart';
 import 'package:adobe_app/pages/p_user/p_student_info.dart';
 import 'package:adobe_app/widgets/text_field.dart';
 import 'package:adobe_app/widgets/title.dart';
@@ -26,7 +27,7 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
     return FutureBuilder(
       future: ClassManager.instance.getClassInfo(widget.classId),
       builder: (context, snapshot) {
-        if(!snapshot.hasData){
+        if (!snapshot.hasData) {
           return CircularProgressIndicator();
         }
 
@@ -78,6 +79,16 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                 child: MyTitle(text: snapshot.data!['join_code'], fontSize: 15),
               ),
             ],
+            leading: IconButton(
+              onPressed: () {
+                Nav.go(context, '/');
+              },
+              icon: Image(
+                image: AssetImage('assets/logo-500x500.png'),
+                height: 100,
+                fit: BoxFit.contain,
+              ),
+            ),
           ),
           body: SingleChildScrollView(
             child: Center(

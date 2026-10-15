@@ -1,4 +1,5 @@
 import 'package:adobe_app/pages/p_auth/p_login.dart';
+import 'package:adobe_app/pages/p_auth/p_signup.dart';
 import 'package:adobe_app/pages/p_user/p_classroom.dart';
 import 'package:adobe_app/pages/p_user/p_teacher_dash.dart';
 import 'package:adobe_app/pages/p_user/p_user.dart';
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
       routes: [
         GoRoute(path: '/', builder: (context, state) => const WebHomePage()),
         GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
+        GoRoute(path: '/register', builder: (context, state) => Signup()),
         GoRoute(
           path: '/contact',
           builder: (context, state) => const ContactPage(),
@@ -58,7 +60,7 @@ class MyApp extends StatelessWidget {
             return TeacherDashboardPage(classId: classId);
           },
         ),
-                GoRoute(
+        GoRoute(
           path: '/dashboard/joined-classes/:classId',
           builder: (context, state) {
             final classId = state.pathParameters['classId']!;

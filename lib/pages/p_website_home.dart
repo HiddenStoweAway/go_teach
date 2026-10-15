@@ -14,7 +14,6 @@ class HomeAppBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _HomeAppBarState extends State<HomeAppBar> {
   @override
-  @override
   Widget build(BuildContext context) {
     final currentUser = AuthManager.instance.currentUser();
 

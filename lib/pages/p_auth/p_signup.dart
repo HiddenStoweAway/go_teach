@@ -5,12 +5,15 @@ import 'package:adobe_app/widgets/title.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+// ignore: must_be_immutable
 class Signup extends StatelessWidget {
   Signup({super.key});
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final passwordConfController = TextEditingController();
+
+  bool signUpStarted = false;
 
   void signUp(BuildContext context) async {
     if (passwordConfController.text.isEmpty ||
@@ -31,6 +34,7 @@ class Signup extends StatelessWidget {
       return;
     }
 
+    signUpStarted = true;
     try {
       AuthManager auth = AuthManager.instance;
       await auth.signUp(emailController.text, passwordController.text);
@@ -43,6 +47,7 @@ class Signup extends StatelessWidget {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
+    signUpStarted = false;
   }
 
   @override
@@ -99,7 +104,9 @@ class Signup extends StatelessWidget {
                   // SUBMIT BUTTON
                   GestureDetector(
                     onTap: () {
-                      signUp(context);
+                      if(!signUpStarted){
+                        signUp(context);
+                      }
                     },
                     child: Container(
                       height: 50,

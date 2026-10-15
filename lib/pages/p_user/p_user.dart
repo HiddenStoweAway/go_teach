@@ -1,7 +1,6 @@
 import 'package:adobe_app/managers/auth_manager.dart';
 import 'package:adobe_app/managers/class_manager.dart';
 import 'package:adobe_app/managers/mynav.dart';
-import 'package:adobe_app/pages/p_user/p_classroom.dart';
 import 'package:adobe_app/widgets/text_field.dart';
 import 'package:adobe_app/widgets/title.dart';
 import 'package:flutter/material.dart';
@@ -114,21 +113,30 @@ class _UserPageState extends State<UserPage> {
         title: MyTitle(text: AuthManager.instance.currentUser()!.email!),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
-          IconButton(
-            onPressed: () {
-              AuthManager.instance.signOut();
-            },
-            icon: Icon(Icons.logout),
-          ),
+          // IconButton(
+          //   onPressed: () {
+          //     AuthManager.instance.signOut();
+          //   },
+          //   icon: Icon(Icons.logout),
+          // ),
         ],
+        leading: IconButton(
+          onPressed: () {
+            Nav.go(context, '/');
+          },
+          icon: Image(
+            image: AssetImage('assets/logo-500x500.png'),
+            height: 100,
+            fit: BoxFit.contain,
+          ),
+        ),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             MyTitle(text: "My Classes: ", fontSize: 21),
-            SizedBox(height: 15,),
-
+            SizedBox(height: 15),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 50.0),
@@ -167,7 +175,10 @@ class _UserPageState extends State<UserPage> {
                             padding: EdgeInsets.only(left: 15),
                             child: GestureDetector(
                               onTap: () {
-                                Nav.go(context, "/dashboard/created-classes/$className"); // is actually the id don't worry
+                                Nav.go(
+                                  context,
+                                  "/dashboard/created-classes/$className",
+                                ); // is actually the id don't worry
                               },
                               child: Container(
                                 width: 250,
@@ -199,12 +210,10 @@ class _UserPageState extends State<UserPage> {
               ),
             ),
 
-
-            SizedBox(height: 50,),
+            SizedBox(height: 50),
 
             MyTitle(text: "Join Classes: ", fontSize: 21),
-            SizedBox(height: 15,),
-
+            SizedBox(height: 15),
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 50.0),
@@ -248,13 +257,15 @@ class _UserPageState extends State<UserPage> {
                                 return CircularProgressIndicator();
                               }
 
-
                               final data = snapshot.data;
                               return Padding(
                                 padding: EdgeInsets.only(left: 15),
                                 child: GestureDetector(
                                   onTap: () {
-                                    Nav.go(context, "/dashboard/joined-classes/$className");
+                                    Nav.go(
+                                      context,
+                                      "/dashboard/joined-classes/$className",
+                                    );
                                   },
                                   child: Container(
                                     width: 250,

@@ -40,98 +40,124 @@ class _StudentInfoPageState extends State<StudentInfoPage> {
           body: Center(
             child: SingleChildScrollView(
               child: Column(
-                children: [
-                  ...widget.reports.map((report) {
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 20.0),
-                      child: Container(
-                        width: 1000,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Theme.of(context).colorScheme.primaryContainer,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(15.0),
-                          child: Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                spacing: 10,
-                                children: [
-                                  report['understanding'] == 'low'
-                                      ? Icon(
-                                          Icons.assignment_late_rounded,
-                                          color: Colors.red,
-                                        )
-                                      : report['understanding'] == 'medium'
-                                      ? Icon(
-                                          Icons.access_time,
-                                          color: Colors.orange,
-                                        )
-                                      : report['understanding'] == 'high'
-                                      ? Icon(
-                                          Icons.thumb_up,
-                                          color: Colors.green,
-                                        )
-                                      : report['understanding'] == 'complete'
-                                      ? Icon(
-                                          Icons.check,
-                                          color: Colors.blue,
-                                        )
-                                      : Icon(Icons.question_mark),
-
-                                  MyTitle(
-                                    text: report['current_learning_goal'],
-                                    softWrap: true,
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                spacing: 10,
-                                children: [
-                                  MyTitle(text: "Strengths:"),
-                                  Expanded(
-                                    child: Text(
-                                      report['strengths'],
-                                      softWrap: true,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                spacing: 10,
-                                children: [
-                                  MyTitle(text: "Weaknesses:"),
-                                  Expanded(
-                                    child: Text(
-                                      report['weaknesses'],
-                                      softWrap: true,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                spacing: 10,
-                                children: [
-                                  MyTitle(text: "Progress:"),
-                                  Expanded(
-                                    child: Text(
-                                      report['progress'],
-                                      softWrap: true,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                children: widget.reports.isEmpty
+                    ? [
+                        Container(
+                          width: 1000,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Text(
+                              "No student data."
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  }),
-                ],
+                      ]
+                    : [
+                        ...widget.reports.map((report) {
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 20.0),
+                            child: Container(
+                              width: 1000,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primaryContainer,
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(15.0),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      spacing: 10,
+                                      children: [
+                                        report['understanding'] == 'low'
+                                            ? Icon(
+                                                Icons.assignment_late_rounded,
+                                                color: Colors.red,
+                                              )
+                                            : report['understanding'] ==
+                                                  'medium'
+                                            ? Icon(
+                                                Icons.access_time,
+                                                color: Colors.orange,
+                                              )
+                                            : report['understanding'] == 'high'
+                                            ? Icon(
+                                                Icons.thumb_up,
+                                                color: Colors.green,
+                                              )
+                                            : report['understanding'] ==
+                                                  'complete'
+                                            ? Icon(
+                                                Icons.check,
+                                                color: Colors.blue,
+                                              )
+                                            : Icon(Icons.question_mark),
+
+                                        MyTitle(
+                                          text: report['current_learning_goal'],
+                                          softWrap: true,
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      spacing: 10,
+                                      children: [
+                                        MyTitle(text: "Strengths:"),
+                                        Expanded(
+                                          child: Text(
+                                            report['strengths'],
+                                            softWrap: true,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      spacing: 10,
+                                      children: [
+                                        MyTitle(text: "Weaknesses:"),
+                                        Expanded(
+                                          child: Text(
+                                            report['weaknesses'],
+                                            softWrap: true,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      spacing: 10,
+                                      children: [
+                                        MyTitle(text: "Progress:"),
+                                        Expanded(
+                                          child: Text(
+                                            report['progress'],
+                                            softWrap: true,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      ],
               ),
             ),
           ),
