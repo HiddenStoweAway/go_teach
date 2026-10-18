@@ -7,12 +7,10 @@ class StudentInfoPage extends StatefulWidget {
     super.key,
     required this.classID,
     required this.studentID,
-    required this.reports,
   });
 
   final String classID;
   final String studentID;
-  final List<Map<String, dynamic>> reports;
 
   @override
   State<StudentInfoPage> createState() => _StudentInfoPageState();
@@ -24,13 +22,15 @@ class _StudentInfoPageState extends State<StudentInfoPage> {
     return FutureBuilder(
       future: Future.wait([
         ClassManager.instance.getUserInfo(widget.studentID),
+        ClassManager.instance.getUserReports(widget.studentID),
       ]),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return CircularProgressIndicator();
         }
 
-        final studentInfo = snapshot.data![0];
+        final studentInfo = snapshot.data![0] as Map<String, dynamic>;
+        final reports = snapshot.data![1] as List<Map<String, dynamic>>;
 
         return Scaffold(
           appBar: AppBar(
@@ -40,7 +40,7 @@ class _StudentInfoPageState extends State<StudentInfoPage> {
           body: Center(
             child: SingleChildScrollView(
               child: Column(
-                children: widget.reports.isEmpty
+                children: reports.isEmpty
                     ? [
                         Container(
                           width: 1000,
@@ -52,14 +52,12 @@ class _StudentInfoPageState extends State<StudentInfoPage> {
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(15.0),
-                            child: Text(
-                              "No student data."
-                            ),
+                            child: Text("No student data."),
                           ),
                         ),
                       ]
                     : [
-                        ...widget.reports.map((report) {
+                        ...reports.map((report) {
                           return Padding(
                             padding: const EdgeInsets.only(top: 20.0),
                             child: Container(

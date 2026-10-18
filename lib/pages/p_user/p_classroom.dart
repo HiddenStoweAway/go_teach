@@ -27,7 +27,7 @@ class _ClassroomPageState extends State<ClassroomPage> {
 
     setState(() {
       messages.add({'role': 'user', 'text': msg});
-      messages.add({'text': 'Loading...'});
+      messages.add({'text': 'Thinking...'});
     });
 
     final response = await _chatManager?.sendMessage(widget.classId, msg);

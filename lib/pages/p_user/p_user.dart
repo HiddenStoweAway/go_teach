@@ -131,176 +131,174 @@ class _UserPageState extends State<UserPage> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              MyTitle(text: "My Classes: ", fontSize: 21),
-              SizedBox(height: 15),
-        
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 50.0),
-                child: FutureBuilder<List<String>>(
-                  future: ClassManager.instance.getMyClassNames(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator();
-                    }
-        
-                    final classes = snapshot.data ?? [];
-        
-                    return SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () async {
-                              await showCreateClassDialogue();
-                              setState(() {}); // refresh after adding
-                            },
-                            child: Container(
-                              width: 250,
-                              height: 250,
-                              decoration: BoxDecoration(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: Icon(Icons.add_circle_outline, size: 25),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            MyTitle(text: "My Classes: ", fontSize: 21),
+            SizedBox(height: 15),
+      
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50.0),
+              child: FutureBuilder<List<String>>(
+                future: ClassManager.instance.getMyClassNames(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  }
+      
+                  final classes = snapshot.data ?? [];
+      
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () async {
+                            await showCreateClassDialogue();
+                            setState(() {}); // refresh after adding
+                          },
+                          child: Container(
+                            width: 250,
+                            height: 250,
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(15),
                             ),
+                            child: Icon(Icons.add_circle_outline, size: 25),
                           ),
-                          ...classes.map(
-                            (className) => Padding(
-                              padding: EdgeInsets.only(left: 15),
-                              child: GestureDetector(
-                                onTap: () {
-                                  Nav.go(
+                        ),
+                        ...classes.map(
+                          (className) => Padding(
+                            padding: EdgeInsets.only(left: 15),
+                            child: GestureDetector(
+                              onTap: () {
+                                Nav.go(
+                                  context,
+                                  "/dashboard/created-classes/$className",
+                                ); // is actually the id don't worry
+                              },
+                              child: Container(
+                                width: 250,
+                                height: 250,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(
                                     context,
-                                    "/dashboard/created-classes/$className",
-                                  ); // is actually the id don't worry
-                                },
-                                child: Container(
-                                  width: 250,
-                                  height: 250,
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primaryContainer,
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: Center(
-                                    child: MyTitle(
-                                      text: className.replaceAll(
-                                        AuthManager.instance.currentUser()!.id,
-                                        "",
-                                      ),
-        
-                                      fontSize: 18,
+                                  ).colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: Center(
+                                  child: MyTitle(
+                                    text: className.replaceAll(
+                                      AuthManager.instance.currentUser()!.id,
+                                      "",
                                     ),
+      
+                                    fontSize: 18,
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
-        
-              SizedBox(height: 50),
-        
-              MyTitle(text: "Join Classes: ", fontSize: 21),
-              SizedBox(height: 15),
-        
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 50.0),
-                child: FutureBuilder<List<String>>(
-                  future: ClassManager.instance.getJoinedClassNames(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator();
-                    }
-        
-                    final classes = snapshot.data ?? [];
-                    return SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () async {
-                              await showJoinClassDialogue();
-                              setState(() {}); // refresh after adding
-                            },
-                            child: Container(
-                              width: 250,
-                              height: 250,
-                              decoration: BoxDecoration(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: Icon(Icons.add_circle_outline, size: 25),
+            ),
+      
+            SizedBox(height: 50),
+      
+            MyTitle(text: "Join Classes: ", fontSize: 21),
+            SizedBox(height: 15),
+      
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 50.0),
+              child: FutureBuilder<List<String>>(
+                future: ClassManager.instance.getJoinedClassNames(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  }
+      
+                  final classes = snapshot.data ?? [];
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () async {
+                            await showJoinClassDialogue();
+                            setState(() {}); // refresh after adding
+                          },
+                          child: Container(
+                            width: 250,
+                            height: 250,
+                            decoration: BoxDecoration(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(15),
                             ),
+                            child: Icon(Icons.add_circle_outline, size: 25),
                           ),
-                          ...classes.map(
-                            (className) => FutureBuilder(
-                              future: ClassManager.instance.getClassInfo(
-                                className,
-                              ),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return CircularProgressIndicator();
-                                }
-        
-                                final data = snapshot.data;
-                                return Padding(
-                                  padding: EdgeInsets.only(left: 15),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      Nav.go(
+                        ),
+                        ...classes.map(
+                          (className) => FutureBuilder(
+                            future: ClassManager.instance.getClassInfo(
+                              className,
+                            ),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return CircularProgressIndicator();
+                              }
+      
+                              final data = snapshot.data;
+                              return Padding(
+                                padding: EdgeInsets.only(left: 15),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Nav.go(
+                                      context,
+                                      "/dashboard/joined-classes/$className",
+                                    );
+                                  },
+                                  child: Container(
+                                    width: 250,
+                                    height: 250,
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(
                                         context,
-                                        "/dashboard/joined-classes/$className",
-                                      );
-                                    },
-                                    child: Container(
-                                      width: 250,
-                                      height: 250,
-                                      decoration: BoxDecoration(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primaryContainer,
-                                        borderRadius: BorderRadius.circular(15),
-                                      ),
-                                      child: Center(
-                                        child: MyTitle(
-                                          text: className.replaceAll(
-                                            data?['owner_id'],
-                                            "",
-                                          ),
-        
-                                          fontSize: 18,
+                                      ).colorScheme.primaryContainer,
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    child: Center(
+                                      child: MyTitle(
+                                        text: className.replaceAll(
+                                          data?['owner_id'],
+                                          "",
                                         ),
+      
+                                        fontSize: 18,
                                       ),
                                     ),
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                              );
+                            },
                           ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

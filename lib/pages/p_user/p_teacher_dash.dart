@@ -1,3 +1,4 @@
+import 'package:adobe_app/managers/auth_manager.dart';
 import 'package:adobe_app/managers/class_manager.dart';
 import 'package:adobe_app/managers/mynav.dart';
 import 'package:adobe_app/pages/p_user/p_student_info.dart';
@@ -27,14 +28,22 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
     return FutureBuilder(
       future: ClassManager.instance.getClassInfo(widget.classId),
       builder: (context, snapshot) {
+
         if (!snapshot.hasData) {
           return CircularProgressIndicator();
         }
+        final owner = snapshot.data?['owner_id'];
+        final className = widget.classId.replaceAll(snapshot.data?['owner_id'], "");
 
+        if(owner != AuthManager.instance.currentUser()?.id){
+          return Scaffold(
+            body: Center(child: Text("Error: You are not signed in or on the wrong account")),
+          );
+        }
         final studentIDS = snapshot.data?['students'];
         return Scaffold(
           appBar: AppBar(
-            title: MyTitle(text: getClassName(snapshot.data!)),
+            title: MyTitle(text: className),
             backgroundColor: Theme.of(context).colorScheme.inversePrimary,
             actions: [
               TextButton(
@@ -202,21 +211,20 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                     return Padding(
                       padding: const EdgeInsets.only(top: 20),
                       child: GestureDetector(
-                        onTap: () async {
-                          final reports = await ClassManager.instance
-                              .getUserReports(studentID);
+                        onTap: () {
+                          Nav.go(context, "/dashboard/created-classes/${widget.classId}/$studentID");
 
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return StudentInfoPage(
-                                  classID: widget.classId,
-                                  studentID: studentID,
-                                  reports: reports,
-                                );
-                              },
-                            ),
-                          );
+                          // Navigator.of(context).push(
+                          //   MaterialPageRoute(
+                          //     builder: (context) {
+                          //       return StudentInfoPage(
+                          //         classID: widget.classId,
+                          //         studentID: studentID,
+                          //         reports: reports,
+                          //       );
+                          //     },
+                          //   ),
+                          // );
                         },
                         child: Container(
                           width: 1000,

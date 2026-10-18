@@ -1,5 +1,6 @@
 import 'package:adobe_app/managers/auth_manager.dart';
 import 'package:adobe_app/managers/mynav.dart';
+import 'package:adobe_app/pages/p_website_home.dart';
 import 'package:adobe_app/widgets/text_field.dart';
 import 'package:adobe_app/widgets/title.dart';
 import 'package:flutter/material.dart';
@@ -53,10 +54,7 @@ class Signup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: MyTitle(text: "Sign Up!"),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
+      appBar: HomeAppBar(),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(50.0),
@@ -72,7 +70,7 @@ class Signup extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   MyTitle(
-                    text: "Enter your registration information: ",
+                    text: "Register: ",
                     fontSize: 18,
                   ),
 
