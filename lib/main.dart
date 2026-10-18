@@ -13,7 +13,7 @@ import 'api_keys.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  usePathUrlStrategy();
+  // usePathUrlStrategy();
 
   final keys = ApiKeys.instance;
 
