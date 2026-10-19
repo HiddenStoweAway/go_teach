@@ -1,7 +1,6 @@
 import 'package:adobe_app/managers/auth_manager.dart';
 import 'package:adobe_app/managers/class_manager.dart';
 import 'package:adobe_app/managers/mynav.dart';
-import 'package:adobe_app/pages/p_user/p_student_info.dart';
 import 'package:adobe_app/widgets/text_field.dart';
 import 'package:adobe_app/widgets/title.dart';
 import 'package:flutter/material.dart';
